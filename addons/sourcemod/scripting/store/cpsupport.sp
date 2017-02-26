@@ -79,7 +79,7 @@ public CPSupport_Remove(client, id)
 {
 }
 
-public Action:OnChatMessage(int& client, ArrayList recipients, eChatFlags& flag, char[] name, char[] message, bool& bProcessColors, bool& bRemoveColors)
+public Action CP_OnChatMessage(int& client, ArrayList recipients, char[] flagstring, char[] name, char[] message, bool& processcolors, bool& removecolors)
 {
 	new m_iEquippedNameTag = Store_GetEquippedItem(client, "nametag");
 	new m_iEquippedNameColor = Store_GetEquippedItem(client, "namecolor");
@@ -108,10 +108,10 @@ public Action:OnChatMessage(int& client, ArrayList recipients, eChatFlags& flag,
 
 	if(m_iEquippedMsgColor >= 0)
 	{
-		new String:m_szMessage[MAXLENGTH_INPUT];
+		new String:m_szMessage[MAXLENGTH_BUFFER];
 		strcopy(STRING(m_szMessage), message);
-		Format(message, MAXLENGTH_INPUT, "%s%s", g_szMessageColors[Store_GetDataIndex(m_iEquippedMsgColor)], m_szMessage);
-		ReplaceColors(message, MAXLENGTH_INPUT, client);
+		Format(message, MAXLENGTH_BUFFER, "%s%s", g_szMessageColors[Store_GetDataIndex(m_iEquippedMsgColor)], m_szMessage);
+		ReplaceColors(message, MAXLENGTH_BUFFER, client);
 	}
 
 	return Plugin_Changed;
