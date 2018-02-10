@@ -68,15 +68,6 @@ enum Menu_Handler
 //		GLOBAL VARIABLES		//
 //////////////////////////////////
 
-new GAME_CSS = false;
-new GAME_CSGO = false;
-new GAME_DOD = false;
-new GAME_TF2 = false;
-new GAME_L4D = false;
-new GAME_L4D2 = false;
-
-new String:g_szGameDir[64];
-
 new Handle:g_hDatabase = INVALID_HANDLE;
 new Handle:g_hAdminMenu = INVALID_HANDLE;
 new Handle:g_hLogFile = INVALID_HANDLE;
@@ -196,33 +187,7 @@ public OnPluginStart()
 {
 	RegPluginLibrary("store_zephyrus");
 
-	// Identify the game
-	GetGameFolderName(g_szGameDir, sizeof(g_szGameDir));
-	
-	if(strcmp(g_szGameDir, "cstrike")==0)
-		GAME_CSS = true;
-	else if(strcmp(g_szGameDir, "csgo")==0)
-		GAME_CSGO = true;
-	else if(strcmp(g_szGameDir, "csco")==0)
-		GAME_CSGO = true;
-	else if(strcmp(g_szGameDir, "dod")==0)
-		GAME_DOD = true;
-	else if(strcmp(g_szGameDir, "tf")==0)
-		GAME_TF2 = true;
-	else if(strcmp(g_szGameDir, "l4d")==0)
-		GAME_L4D = true;
-	else if(strcmp(g_szGameDir, "l4d2")==0)
-		GAME_L4D2 = true;
-	else
-	{
-		SetFailState("This game is not be supported. Please contact the author for support.");
-	}
-
-	// Hide warnings
-	if (GAME_DOD || GAME_L4D || GAME_L4D2)
-	{
-		// Nothing...
-	}
+	IdentifyGame();
 
 	// Setting default values
 	for(new i=1;i<=MaxClients;++i)
@@ -670,7 +635,7 @@ public OnConfigsExecuted()
 		}
 	}
 
-	CSetPrefix(CHAT_TAG);
+	CSetPrefix(g_eCvars[g_cvarChatTag][sCache]);
 }
 
 public OnGameFrame()

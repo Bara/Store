@@ -107,7 +107,7 @@ stock void ToggleThirdperson(int client)
 
 stock void SetThirdperson(int client, bool tp)
 {
-	if(g_bCSGO)
+	if(GAME_CSGO)
 	{
 		static Handle m_hAllowTP = INVALID_HANDLE;
 		if(m_hAllowTP == INVALID_HANDLE)
@@ -120,7 +120,7 @@ stock void SetThirdperson(int client, bool tp)
 		else
 		ClientCommand(client, "firstperson");
 	}
-	else if(g_bTF)
+	else if(GAME_TF2)
 	{
 		if(tp)
 			SetVariantInt(1);

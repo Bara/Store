@@ -32,6 +32,15 @@ new g_eCvars[MAX_CVARS][CVAR_CACHE];
 
 new g_iCvars = 0;
 
+new GAME_CSS = false;
+new GAME_CSGO = false;
+new GAME_DOD = false;
+new GAME_TF2 = false;
+new GAME_L4D = false;
+new GAME_L4D2 = false;
+
+new String:g_szGameDir[64];
+
 #define LoopConnectedClients(%1) for(new %1=1;%1<=MaxClients;++%1)\
 								if(IsClientConnected(%1))
 
@@ -47,6 +56,37 @@ new g_iCvars = 0;
 #define LoopAlivePlayers(%1) for(new %1=1;%1<=MaxClients;++%1)\
 								if(IsClientInGame(%1) && IsPlayerAlive(%1))
 
+
+stock bool:IdentifyGame()
+{
+	// Identify the game
+	GetGameFolderName(g_szGameDir, sizeof(g_szGameDir));
+	
+	if(strcmp(g_szGameDir, "cstrike")==0)
+		GAME_CSS = true;
+	else if(strcmp(g_szGameDir, "csgo")==0)
+		GAME_CSGO = true;
+	else if(strcmp(g_szGameDir, "csco")==0)
+		GAME_CSGO = true;
+	else if(strcmp(g_szGameDir, "dod")==0)
+		GAME_DOD = true;
+	else if(strcmp(g_szGameDir, "tf")==0)
+		GAME_TF2 = true;
+	else if(strcmp(g_szGameDir, "l4d")==0)
+		GAME_L4D = true;
+	else if(strcmp(g_szGameDir, "l4d2")==0)
+		GAME_L4D2 = true;
+	else
+	{
+		SetFailState("This game is not be supported. Please contact the author for support.");
+	}
+
+	// Hide warnings
+	if(GAME_CSS || GAME_CSGO || GAME_DOD || GAME_TF2 || GAME_L4D || GAME_L4D2)
+	{
+		// Nothing...
+	}
+}
 
 stock bool:PrintKeyHintText(client, const String:format[], any:...)
 {

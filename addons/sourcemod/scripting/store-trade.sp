@@ -18,6 +18,7 @@
 
 #include <sourcemod>
 #include <sdktools>
+#include <multicolors>
 
 #undef REQUIRE_EXTENSIONS
 #undef REQUIRE_PLUGIN
@@ -90,6 +91,7 @@ public OnPluginStart()
 public OnAllPluginsLoaded()
 {
 	g_cvarChatTag = HookConVar("sm_store_chat_tag", TYPE_STRING);
+	CSetPrefix(g_eCvars[g_cvarChatTag][sCache]);
 }
 
 //////////////////////////////
@@ -129,7 +131,7 @@ public Action:Command_Offer(client, args)
 {
 	if(!g_iTraders[client])
 	{
-		Chat(client, "%t", "Trade Not Active");
+		CPrintToChat(client, "%t", "Trade Not Active");
 		return Plugin_Handled;
 	}
 
@@ -139,7 +141,7 @@ public Action:Command_Offer(client, args)
 	new m_iCredits = StringToInt(m_szCredits);
 	if(m_iCredits < 0 || Store_GetClientCredits(client) < m_iCredits)
 	{
-		Chat(client, "%t", "Credit Invalid Amount");
+		CPrintToChat(client, "%t", "Credit Invalid Amount");
 		return Plugin_Handled;
 	}
 
@@ -154,14 +156,14 @@ public Action:Command_Trade(client, args)
 {
 	if(g_iTraders[client])
 	{
-		//Chat(client, "%t", "Trade Active");
+		//CPrintToChat(client, "%t", "Trade Active");
 		DisplayTradeMenu(client);
 		return Plugin_Handled;
 	}
 
 	if(g_iTradeCooldown[client] > GetTime())
 	{
-		Chat(client, "%t", "Trade Cooldown");
+		CPrintToChat(client, "%t", "Trade Cooldown");
 		return Plugin_Handled;
 	}
 
@@ -217,7 +219,7 @@ public MenuHandler_SelectPlayer(Handle:menu, MenuAction:action, client, param2)
 		new target = GetClientOfUserId(StringToInt(m_szUserId));
 		if(!target || !IsClientInGame(target))
 		{
-			Chat(client, "%t", "Player left");
+			CPrintToChat(client, "%t", "Player left");
 			Command_Trade(client, 0);
 			return;
 		}
@@ -225,7 +227,7 @@ public MenuHandler_SelectPlayer(Handle:menu, MenuAction:action, client, param2)
 		g_iTradeCooldown[client] = GetTime() + g_eCvars[g_cvarTradeCooldown][aCache];
 		g_iTraders[client] = GetClientUserId(target);
 
-		Chat(client, "%t", "Waiting for confirmation");
+		CPrintToChat(client, "%t", "Waiting for confirmation");
 		new Handle:m_hMenu = CreateMenu(MenuHandler_InitTrade);
 		SetMenuTitle(m_hMenu, "%t", "Trade Confirm", client);
 		SetMenuExitButton(m_hMenu, false);
@@ -245,7 +247,7 @@ public MenuHandler_InitTrade(Handle:menu, MenuAction:action, client, param2)
 		{
 			if(g_iTraders[i] == GetClientUserId(client))
 			{
-				Chat(i, "%t", "Trade Refused", client);
+				CPrintToChat(i, "%t", "Trade Refused", client);
 				g_iTraders[i] = 0;
 				return;
 			}
@@ -268,13 +270,13 @@ public MenuHandler_InitTrade(Handle:menu, MenuAction:action, client, param2)
 
 		if(param2 == 1)
 		{
-			Chat(target, "%t", "Trade Refused", client);
+			CPrintToChat(target, "%t", "Trade Refused", client);
 			return;
 		}
 
 		if(!target)
 		{
-			Chat(client, "%t", "Player left");
+			CPrintToChat(client, "%t", "Player left");
 			return;
 		}
 
@@ -340,7 +342,7 @@ public DisplayPartnerMenu(client)
 
 	if(!g_bMenuOpen[client])
 	{
-		Chat(client, "%t", "Trade Menu");
+		CPrintToChat(client, "%t", "Trade Menu");
 	}
 
 	decl String:m_szMessage[256];
@@ -455,7 +457,7 @@ public Action:Timer_ReadyTimer(Handle:timer, any:data)
 		if(g_hReadyTimers[i] == timer)
 		{
 			if(data > 0)
-				Chat(i, "%t", "Ready Timer", data);
+				CPrintToChat(i, "%t", "Ready Timer", data);
 			if(client == 0)
 				client = i;
 			else
@@ -482,8 +484,8 @@ public Action:Timer_ReadyTimer(Handle:timer, any:data)
 		ResetTrade(target);
 		ResetTrade(client);
 
-		Chat(target, "%t", "Trade Successful");
-		Chat(client, "%t", "Trade Successful");
+		CPrintToChat(target, "%t", "Trade Successful");
+		CPrintToChat(client, "%t", "Trade Successful");
 
 		if(g_bMenuOpen[client] == true)
 			CancelClientMenu(client);
@@ -510,7 +512,7 @@ public MenuHandler_Cancel(Handle:menu, MenuAction:action, client, param2)
 			if(!target || !IsClientInGame(target))
 				return;
 			ResetTrade(target);
-			Chat(target, "%t", "Trade Cancelled");
+			CPrintToChat(target, "%t", "Trade Cancelled");
 		}
 		else
 			DisplayTradeMenu(client);
