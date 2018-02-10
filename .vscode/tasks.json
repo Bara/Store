@@ -1,0 +1,45 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile plugin",
+            "type": "shell",
+
+            "presentation": {
+                "panel": "new"
+            },
+
+            "windows":{
+                "command": "D:\\Cloud\\SourcePawn\\Compiler\\1.10\\spcomp.exe",
+            },
+
+            "args": [
+                "${file}",
+                "-O2",
+                "-v2",
+                "-iD:\\Cloud\\SourcePawn\\Compiler\\1.10",
+                "-i${workspaceFolder}\\addons\\sourcemod\\scripting\\include",
+                "-o${workspaceFolder}\\addons\\sourcemod\\\\plugins\\${fileBasenameNoExtension}.smx"
+            ],
+
+            "problemMatcher": {
+                "owner": "sp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*)\\((.+)\\)\\s:\\s(((warning|error|fatal error)\\s\\d+):\\s.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 5,
+                    "message": 3
+                }
+            },
+
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
