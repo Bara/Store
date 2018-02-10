@@ -71,9 +71,6 @@ public OnPluginStart()
 {
 	IdentifyGame();
 
-	// Supress warnings about unused variables.....
-	if(g_bL4D || g_bL4D2 || g_bND) {}
-
 	g_cvarTradeEnabled = RegisterConVar("sm_store_trade_enabled", "1", "Enable/disable the Store trade system", TYPE_INT);
 	g_cvarTradeCooldown = RegisterConVar("sm_store_trade_cooldown", "300", "Time in seconds between trade ATTEMPTS", TYPE_INT);
 	g_cvarTradeReadyDelay = RegisterConVar("sm_store_trade_ready_delay", "5", "Time in seconds before finishing trade", TYPE_INT);

@@ -103,7 +103,7 @@ public Action CP_OnChatMessage(int& client, ArrayList recipients, char[] flagstr
 		strcopy(STRING(m_szNameColor), g_szNameColors[m_iNameColor]);
 	}
 	Format(STRING(m_szName), "%s%s%s", m_szNameTag, m_szNameColor, name);
-	ReplaceColors(STRING(m_szName), client);
+	CFormatColor(m_szName, sizeof(m_szName), client);
 	strcopy(name, MAXLENGTH_NAME, m_szName);
 
 	if(m_iEquippedMsgColor >= 0)
@@ -111,7 +111,7 @@ public Action CP_OnChatMessage(int& client, ArrayList recipients, char[] flagstr
 		new String:m_szMessage[MAXLENGTH_BUFFER];
 		strcopy(STRING(m_szMessage), message);
 		Format(message, MAXLENGTH_BUFFER, "%s%s", g_szMessageColors[Store_GetDataIndex(m_iEquippedMsgColor)], m_szMessage);
-		ReplaceColors(message, MAXLENGTH_BUFFER, client);
+		CFormatColor(message, MAXLENGTH_BUFFER, client);
 	}
 
 	return Plugin_Changed;

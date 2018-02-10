@@ -23,6 +23,7 @@
 #include <zephstocks>
 #include <donate>
 #include <adminmenu>
+#include <multicolors>
 #if !defined STANDALONE_BUILD
 #include <sdkhooks>
 #include <cstrike>
@@ -221,8 +222,11 @@ public OnPluginStart()
 		SetFailState("This game is not be supported. Please contact the author for support.");
 	}
 
-	// Supress warnings about unused variables.....
-	if(GAME_DOD || GAME_L4D || GAME_L4D2 || g_bL4D || g_bL4D2 || g_bND) {}
+	// Hide warnings
+	if (GAME_DOD || GAME_L4D || GAME_L4D2)
+	{
+		// Nothing...
+	}
 
 	// Setting default values
 	for(new i=1;i<=MaxClients;++i)
@@ -336,6 +340,7 @@ public OnPluginStart()
 
 	// Add a say command listener for shortcuts
 	AddCommandListener(Command_Say, "say");
+	AddCommandListener(Command_Say, "say_team");
 
 	LoopIngamePlayers(client)
 	{
@@ -665,12 +670,16 @@ public OnConfigsExecuted()
 		CreateTimer(Float:g_eCvars[g_cvarDatabaseTimeout][aCache], Timer_DatabaseTimeout);
 
 	if(g_eCvars[g_cvarLogging][aCache] == 1)
+	{
 		if(g_hLogFile == INVALID_HANDLE)
 		{
 			new String:m_szPath[PLATFORM_MAX_PATH];
 			BuildPath(Path_SM, STRING(m_szPath), "logs/store.log.txt");
 			g_hLogFile = OpenFile(m_szPath, "w+");
 		}
+	}
+
+	CSetPrefix(CHAT_TAG);
 }
 
 #if !defined STANDALONE_BUILD
@@ -1126,7 +1135,7 @@ public Action:Event_PlayerDeath(Handle:event, const String:name[], bool:dontBroa
 	{
 		g_eClients[attacker][iCredits] += GetMultipliedCredits(attacker, g_eCvars[g_cvarCreditAmountKill][aCache]);
 		if(g_eCvars[g_cvarCreditMessages][aCache])
-			Chat(attacker, "%t", "Credits Earned For Killing", g_eCvars[g_cvarCreditAmountKill][aCache], g_eClients[victim][szName]);
+			CPrintToChat(attacker, "%t", "Credits Earned For Killing", g_eCvars[g_cvarCreditAmountKill][aCache], g_eClients[victim][szName]);
 		Store_LogMessage(attacker, g_eCvars[g_cvarCreditAmountKill][aCache], "Earned for killing");
 	}
 		
@@ -1158,9 +1167,10 @@ public Action:Command_Say(client, const String:command[], argc)
 	{
 		decl String:m_szArg[65];
 		GetCmdArg(1, STRING(m_szArg));
-		if(m_szArg[0] == PublicChatTrigger)
+		if(m_szArg[0] == PublicChatTrigger || m_szArg[0] == SilentChatTrigger)
 		{
 			for(new i=0;i<g_iItems;++i)
+			{
 				if(strcmp(g_eItems[i][szShortcut], m_szArg[1])==0 && g_eItems[i][szShortcut][0] != 0)
 				{
 					g_bInvMode[client]=false;
@@ -1168,6 +1178,12 @@ public Action:Command_Say(client, const String:command[], argc)
 					DisplayStoreMenu(client, i);
 					break;
 				}
+			}
+
+			if (m_szArg[0] == SilentChatTrigger)
+			{
+				return Plugin_Handled;
+			}
 		}
 	}
 	return Plugin_Continue;
@@ -1177,13 +1193,13 @@ public Action:Command_Store(client, params)
 {
 	if(g_eCvars[g_cvarRequiredFlag][aCache] && !GetClientPrivilege(client, g_eCvars[g_cvarRequiredFlag][aCache]))
 	{
-		Chat(client, "%t", "You dont have permission");
+		CPrintToChat(client, "%t", "You dont have permission");
 		return Plugin_Handled;
 	}
 	
 	if((g_eClients[client][iCredits] == -1 && g_eClients[client][iItems] == -1) || !g_eClients[client][bLoaded])
 	{
-		Chat(client, "%t", "Inventory hasnt been fetched");
+		CPrintToChat(client, "%t", "Inventory hasnt been fetched");
 		return Plugin_Handled;
 	}
 	
@@ -1198,13 +1214,13 @@ public Action:Command_Inventory(client, params)
 {
 	if(g_eCvars[g_cvarRequiredFlag][aCache] && !GetClientPrivilege(client, g_eCvars[g_cvarRequiredFlag][aCache]))
 	{
-		Chat(client, "%t", "You dont have permission");
+		CPrintToChat(client, "%t", "You dont have permission");
 		return Plugin_Handled;
 	}
 	
 	if((g_eClients[client][iCredits] == -1 && g_eClients[client][iItems] == -1) || !g_eClients[client][bLoaded])
 	{
-		Chat(client, "%t", "Inventory hasnt been fetched");
+		CPrintToChat(client, "%t", "Inventory hasnt been fetched");
 		return Plugin_Handled;
 	}
 	
@@ -1219,7 +1235,7 @@ public Action:Command_Gift(client, params)
 {
 	if(!g_eCvars[g_cvarCreditGiftEnabled][aCache])
 	{
-		Chat(client, "%t", "Credit Gift Disabled");
+		CPrintToChat(client, "%t", "Credit Gift Disabled");
 		return Plugin_Handled;
 	}
 	
@@ -1229,7 +1245,7 @@ public Action:Command_Gift(client, params)
 	new m_iCredits = StringToInt(m_szTmp);
 	if(g_eClients[client][iCredits]<m_iCredits || m_iCredits<=0)
 	{
-		Chat(client, "%t", "Credit Invalid Amount");
+		CPrintToChat(client, "%t", "Credit Invalid Amount");
 		return Plugin_Handled;
 	}
 
@@ -1240,13 +1256,13 @@ public Action:Command_Gift(client, params)
 	new m_iClients = ProcessTargetString(m_szTmp, 0, m_iTargets, 1, 0, STRING(m_szTmp), m_bTmp);
 	if(m_iClients>2)
 	{
-		Chat(client, "%t", "Credit Too Many Matches");
+		CPrintToChat(client, "%t", "Credit Too Many Matches");
 		return Plugin_Handled;
 	}
 	
 	if(m_iClients != 1)
 	{
-		Chat(client, "%t", "Credit No Match");
+		CPrintToChat(client, "%t", "Credit No Match");
 		return Plugin_Handled;
 	}
 	
@@ -1255,8 +1271,8 @@ public Action:Command_Gift(client, params)
 	g_eClients[client][iCredits] -= m_iCredits;
 	g_eClients[m_iReceiver][iCredits] += m_iCredits;
 	
-	Chat(client, "%t", "Credit Gift Sent", m_iCredits, g_eClients[m_iReceiver][szName]);
-	Chat(m_iReceiver, "%t", "Credit Gift Received", m_iCredits, g_eClients[client][szName]);
+	CPrintToChat(client, "%t", "Credit Gift Sent", m_iCredits, g_eClients[m_iReceiver][szName]);
+	CPrintToChat(m_iReceiver, "%t", "Credit Gift Received", m_iCredits, g_eClients[client][szName]);
 
 	Store_LogMessage(m_iReceiver, m_iCredits, "Gifted by %N", client);
 	Store_LogMessage(client, -m_iCredits, "Gifted to %N", m_iReceiver);
@@ -1268,7 +1284,7 @@ public Action:Command_GiveCredits(client, params)
 {
 	if(client && !GetClientPrivilege(client, g_eCvars[g_cvarAdminFlag][aCache]))
 	{
-		Chat(client, "%t", "You dont have permission");
+		CPrintToChat(client, "%t", "You dont have permission");
 		return Plugin_Handled;
 	}
 	
@@ -1298,7 +1314,7 @@ public Action:Command_GiveCredits(client, params)
 				Format(STRING(m_szQuery), "UPDATE store_players SET credits=credits+%d WHERE authid=\"%s\"", m_iCredits, m_szTmp[8]);
 			}
 			SQL_TVoid(g_hDatabase, m_szQuery);
-			ChatAll("%t", "Credits Given", m_szTmp[8], m_iCredits);
+			CPrintToChatAll("%t", "Credits Given", m_szTmp[8], m_iCredits);
 			m_iReceiver = -1;
 		}
 	} else if(strcmp(m_szTmp, "@all")==0)
@@ -1322,14 +1338,14 @@ public Action:Command_GiveCredits(client, params)
 		if(m_iClients>2)
 		{
 			if(client)
-				Chat(client, "%t", "Credit Too Many Matches");
+				CPrintToChat(client, "%t", "Credit Too Many Matches");
 			else
 				ReplyToCommand(client, "%t", "Credit Too Many Matches");
 			return Plugin_Handled;
 		} else if(m_iClients != 1)
 		{
 			if(client)
-				Chat(client, "%t", "Credit No Match");
+				CPrintToChat(client, "%t", "Credit No Match");
 			else
 				ReplyToCommand(client, "%t", "Credit No Match");
 			return Plugin_Handled;
@@ -1345,13 +1361,13 @@ public Action:Command_GiveCredits(client, params)
 		if(g_eCvars[g_cvarSilent][aCache] == 1)
 		{
 			if(client)
-				Chat(client, "%t", "Credits Given", g_eClients[m_iReceiver][szName], m_iCredits);
+				CPrintToChat(client, "%t", "Credits Given", g_eClients[m_iReceiver][szName], m_iCredits);
 			else
 				ReplyToCommand(client, "%t", "Credits Given", g_eClients[m_iReceiver][szName], m_iCredits);
-			Chat(m_iReceiver, "%t", "Credits Given", g_eClients[m_iReceiver][szName], m_iCredits);
+			CPrintToChat(m_iReceiver, "%t", "Credits Given", g_eClients[m_iReceiver][szName], m_iCredits);
 		}
 		else if(g_eCvars[g_cvarSilent][aCache] == 0)
-			ChatAll("%t", "Credits Given", g_eClients[m_iReceiver][szName], m_iCredits);
+			CPrintToChatAll("%t", "Credits Given", g_eClients[m_iReceiver][szName], m_iCredits);
 		Store_LogMessage(m_iReceiver, m_iCredits, "Given by Admin");
 	}
 	
@@ -1362,7 +1378,7 @@ public Action:Command_ResetPlayer(client, params)
 {
 	if(client && !GetClientPrivilege(client, g_eCvars[g_cvarAdminFlag][aCache]))
 	{
-		Chat(client, "%t", "You dont have permission");
+		CPrintToChat(client, "%t", "You dont have permission");
 		return Plugin_Handled;
 	}
 
@@ -1388,13 +1404,13 @@ public Action:Command_ResetPlayer(client, params)
 		new m_iClients = ProcessTargetString(m_szTmp, 0, m_iTargets, 1, 0, STRING(m_szTmp), m_bTmp);
 		if(m_iClients>2)
 		{
-			Chat(client, "%t", "Credit Too Many Matches");
+			CPrintToChat(client, "%t", "Credit Too Many Matches");
 			return Plugin_Handled;
 		}
 		
 		if(m_iClients != 1)
 		{
-			Chat(client, "%t", "Credit No Match");
+			CPrintToChat(client, "%t", "Credit No Match");
 			return Plugin_Handled;
 		}
 
@@ -1408,7 +1424,7 @@ public Action:Command_ResetPlayer(client, params)
 		g_eClients[m_iReceiver][iCredits] = 0;
 		for(new i=0;i<g_eClients[m_iReceiver][iItems];++i)
 			Store_RemoveItem(m_iReceiver, g_eClientItems[m_iReceiver][i][iUniqueId]);
-		ChatAll("%t", "Player Resetted", g_eClients[m_iReceiver][szName]);
+		CPrintToChatAll("%t", "Player Resetted", g_eClients[m_iReceiver][szName]);
 	}
 	
 	return Plugin_Handled;
@@ -1418,13 +1434,13 @@ public Action:Command_Credits(client, params)
 {	
 	if(g_eClients[client][iCredits] == -1 && g_eClients[client][iItems] == -1)
 	{
-		Chat(client, "%t", "Inventory hasnt been fetched");
+		CPrintToChat(client, "%t", "Inventory hasnt been fetched");
 		return Plugin_Handled;
 	}
 
 	if(g_iSpam[client]<GetTime())
 	{
-		ChatAll("%t", "Player Credits", g_eClients[client][szName], g_eClients[client][iCredits]);
+		CPrintToChatAll("%t", "Player Credits", g_eClients[client][szName], g_eClients[client][iCredits]);
 		g_iSpam[client] = GetTime()+30;
 	}
 	
@@ -1968,7 +1984,7 @@ public DisplayPlayerMenu(client)
 		CloseHandle(m_hMenu);
 		g_iMenuNum[client] = 1;
 		DisplayItemMenu(client, g_iSelectedItem[client]);
-		Chat(client, "%t", "Gift No Players");
+		CPrintToChat(client, "%t", "Gift No Players");
 	}
 	else
 		DisplayMenu(m_hMenu, client, 0);
@@ -1990,7 +2006,7 @@ public MenuHandler_Gift(Handle:menu, MenuAction:action, client, param2)
 			m_iReceiver = GetClientOfUserId(param2);
 			if(!m_iReceiver)
 			{
-				Chat(client, "%t", "Gift Player Left");
+				CPrintToChat(client, "%t", "Gift Player Left");
 				return;
 			}
 			Store_GiftItem(target, m_iReceiver, m_iItem);
@@ -2006,7 +2022,7 @@ public MenuHandler_Gift(Handle:menu, MenuAction:action, client, param2)
 			m_iReceiver = GetClientOfUserId(m_iId);
 			if(!m_iReceiver)
 			{
-				Chat(client, "%t", "Gift Player Left");
+				CPrintToChat(client, "%t", "Gift Player Left");
 				return;
 			}
 				
@@ -2121,7 +2137,7 @@ public Action:Timer_CreditTimer(Handle:timer, any:userid)
 	{
 		g_eClients[client][iCredits] += m_iCredits;
 		if(g_eCvars[g_cvarCreditMessages][aCache])
-			Chat(client, "%t", "Credits Earned For Playing", m_iCredits);
+			CPrintToChat(client, "%t", "Credits Earned For Playing", m_iCredits);
 		Store_LogMessage(client, m_iCredits, "Earned for playing");
 	}
 
@@ -2532,12 +2548,12 @@ public SQLCallback_ResetPlayer(Handle:owner, Handle:hndl, const String:error[], 
 			Format(STRING(m_szQuery), "DELETE FROM store_equipment WHERE player_id=%d", id);
 			SQL_TVoid(g_hDatabase, m_szQuery);
 
-			ChatAll("%t", "Player Resetted", m_szAuthId);
+			CPrintToChatAll("%t", "Player Resetted", m_szAuthId);
 
 		}
 		else
 			if(client)
-				Chat(client, "%t", "Credit No Match");
+				CPrintToChat(client, "%t", "Credit No Match");
 	}
 }
 
@@ -2696,7 +2712,7 @@ Store_BuyItem(client, itemid, plan=-1)
 
 	Store_LogMessage(client, -g_eItems[itemid][iPrice], "Bought a %s %s", g_eItems[itemid][szName], g_eTypeHandlers[g_eItems[itemid][iHandler]][szType]);
 	
-	Chat(client, "%t", "Chat Bought Item", g_eItems[itemid][szName], g_eTypeHandlers[g_eItems[itemid][iHandler]][szType]);
+	CPrintToChat(client, "%t", "Chat Bought Item", g_eItems[itemid][szName], g_eTypeHandlers[g_eItems[itemid][iHandler]][szType]);
 }
 
 public Store_SellItem(client, itemid)
@@ -2713,7 +2729,7 @@ public Store_SellItem(client, itemid)
 	}
 
 	g_eClients[client][iCredits] += m_iCredits;
-	Chat(client, "%t", "Chat Sold Item", g_eItems[itemid][szName], g_eTypeHandlers[g_eItems[itemid][iHandler]][szType]);
+	CPrintToChat(client, "%t", "Chat Sold Item", g_eItems[itemid][szName], g_eTypeHandlers[g_eItems[itemid][iHandler]][szType]);
 	
 	Store_LogMessage(client, m_iCredits, "Sold a %s %s", g_eItems[itemid][szName], g_eTypeHandlers[g_eItems[itemid][iHandler]][szType]);
 
@@ -2737,8 +2753,8 @@ public Store_GiftItem(client, receiver, item)
 	
 	++g_eClients[receiver][iItems];
 
-	Chat(client, "%t", "Chat Gift Item Sent", g_eClients[receiver][szName], g_eItems[m_iId][szName], g_eTypeHandlers[g_eItems[m_iId][iHandler]][szType]);
-	Chat(receiver, "%t", "Chat Gift Item Received", g_eClients[target][szName], g_eItems[m_iId][szName], g_eTypeHandlers[g_eItems[m_iId][iHandler]][szType]);
+	CPrintToChat(client, "%t", "Chat Gift Item Sent", g_eClients[receiver][szName], g_eItems[m_iId][szName], g_eTypeHandlers[g_eItems[m_iId][iHandler]][szType]);
+	CPrintToChat(receiver, "%t", "Chat Gift Item Received", g_eClients[target][szName], g_eItems[m_iId][szName], g_eTypeHandlers[g_eItems[m_iId][iHandler]][szType]);
 
 	Store_LogMessage(client, 0, "Gifted a %s to %N", g_eItems[m_iId][szName], receiver);
 }

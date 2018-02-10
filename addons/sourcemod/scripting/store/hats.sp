@@ -374,8 +374,8 @@ public Store_OnClientModelChanged(client, String:model[])
 		
 		if(m_bHasHats)
 			if(g_eCvars[g_cvarOverrideEnabled][aCache])
-				Chat(client, "%t", "Override Enabled");
+				CPrintToChat(client, "%t", "Override Enabled");
 			else
-				Chat(client, "%t", "Override Disabled");
+				CPrintToChat(client, "%t", "Override Disabled");
 	}
 }
