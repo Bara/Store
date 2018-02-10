@@ -813,8 +813,11 @@ public Native_SetClientCredits(Handle:plugin, numParams)
 {
 	new client = GetNativeCell(1);
 	new m_iCredits = GetNativeCell(2);
+	
 	Store_LogMessage(client, m_iCredits-g_eClients[client][iCredits], "Set by external plugin");
 	g_eClients[client][iCredits] = m_iCredits;
+
+	Store_SaveClientData(client);
 	return 1;
 }
 
@@ -2713,6 +2716,8 @@ Store_BuyItem(client, itemid, plan=-1)
 	Store_LogMessage(client, -g_eItems[itemid][iPrice], "Bought a %s %s", g_eItems[itemid][szName], g_eTypeHandlers[g_eItems[itemid][iHandler]][szType]);
 	
 	CPrintToChat(client, "%t", "Chat Bought Item", g_eItems[itemid][szName], g_eTypeHandlers[g_eItems[itemid][iHandler]][szType]);
+
+	Store_SaveClientInventory(client);
 }
 
 public Store_SellItem(client, itemid)
