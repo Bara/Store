@@ -1,39 +1,15 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 new g_eWeaponColors[STORE_MAX_ITEMS][4];
 
 new g_iWeaponColors = 0;
 
 new bool:g_bColored[2048];
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public WeaponColors_OnPluginStart()
-#endif
 {
-#if !defined STANDALONE_BUILD
-	// This is not a standalone build, we don't want hats to kill the whole plugin for us	
-	if(GetExtensionFileStatus("sdkhooks.ext")!=1)
-	{
-		LogError("SDKHooks isn't installed or failed to load. Hats will be disabled. Please install SDKHooks. (https://forums.alliedmods.net/showthread.php?t=106748)");
-		return;
-	}
-#endif
 	Store_RegisterHandler("weaponcolor", "color", WeaponColors_OnMapStart, WeaponColors_Reset, WeaponColors_Config, WeaponColors_Equip, WeaponColors_Remove, true);
 }
 
-#if defined STANDALONE_BUILD
-public OnClientPutInServer(client)
-#else
 public WeaponColors_OnClientPutInServer(client)
-#endif
 {
 	SDKHook(client, SDKHook_WeaponCanUse, WeaponColors_WeaponCanUse);
 }

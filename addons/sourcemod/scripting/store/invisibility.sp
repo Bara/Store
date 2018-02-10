@@ -1,21 +1,9 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 new Float:g_fInvisibilityTime[STORE_MAX_ITEMS]; 
 
 new g_iInvisibility[STORE_MAX_ITEMS];
 new g_iInvisibilityIdx = 0;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Invisibility_OnPluginStart()
-#endif
 {
 	Store_RegisterHandler("invisibility", "", Invisibility_OnMapStart, Invisibility_Reset, Invisibility_Config, Invisibility_Equip, Invisibility_Remove, false);
 }

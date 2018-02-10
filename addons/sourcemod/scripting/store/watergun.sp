@@ -1,16 +1,4 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Watergun_OnPluginStart()
-#endif
 {
 	if(GAME_TF2)
 		return;

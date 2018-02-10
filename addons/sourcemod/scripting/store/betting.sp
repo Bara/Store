@@ -1,18 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-new GAME_CSS = false;
-new GAME_CSGO = false;
-new GAME_DOD = false;
-new GAME_TF2 = false;
-new GAME_L4D = false;
-new GAME_L4D2 = false;
-#endif
-
 new g_iPlayerPot[MAXPLAYERS+1];
 new g_iPlayerTeam[MAXPLAYERS+1];
 new g_iBettingStart = 0;
@@ -20,30 +5,8 @@ new g_iBettingStart = 0;
 new g_cvarEnableBetting = -1;
 new g_cvarBettingPeriod = -1;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Betting_OnPluginStart()
-#endif
 {
-#if defined STANDALONE_BUILD
-	new String:m_szGameDir[32];
-	GetGameFolderName(m_szGameDir, sizeof(m_szGameDir));
-	
-	if(strcmp(m_szGameDir, "cstrike")==0)
-		GAME_CSS = true;
-	else if(strcmp(m_szGameDir, "csgo")==0)
-		GAME_CSGO = true;
-	else if(strcmp(m_szGameDir, "dod")==0)
-		GAME_DOD = true;
-	else if(strcmp(m_szGameDir, "tf")==0)
-		GAME_TF2 = true;
-	else if(strcmp(m_szGameDir, "l4d")==0)
-		GAME_L4D = true;
-	else if(strcmp(m_szGameDir, "l4d2")==0)
-		GAME_L4D2 = true;
-#endif
-
 	g_cvarEnableBetting = RegisterConVar("sm_store_betting", "1", "Enable/disable betting of credits", TYPE_INT);
 	g_cvarBettingPeriod = RegisterConVar("sm_store_betting_period", "15", "How many seconds betting should be enabled for after round start", TYPE_INT);
 
@@ -63,11 +26,7 @@ public Betting_OnPluginStart()
 	LoadTranslations("store.phrases");
 }
 
-#if defined STANDALONE_BUILD
-public OnClientDisconnect(client)
-#else
 public Betting_OnClientDisconnect(client)
-#endif
 {
 	if(g_iPlayerPot[client] > 0)
 	{

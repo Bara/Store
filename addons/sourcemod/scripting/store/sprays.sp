@@ -1,11 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 new String:g_szSprays[STORE_MAX_ITEMS][PLATFORM_MAX_PATH];
 new g_iSprayPrecache[STORE_MAX_ITEMS] = {-1,...};
 new g_iSprayCache[MAXPLAYERS+1] = {-1,...};
@@ -15,11 +7,7 @@ new g_iSprays = 0;
 new g_cvarSprayLimit = -1;
 new g_cvarSprayDistance = -1;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Sprays_OnPluginStart()
-#endif
 {
 	g_cvarSprayLimit = RegisterConVar("sm_store_spray_limit", "30", "Number of seconds between two sprays", TYPE_INT);
 	g_cvarSprayDistance = RegisterConVar("sm_store_spray_distance", "115", "Distance from wall to spray", TYPE_FLOAT);

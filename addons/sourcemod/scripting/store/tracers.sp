@@ -1,13 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-new bool:GAME_TF2 = false;
-#endif
-
 new g_cvarTracerMaterial = -1;
 new g_cvarTracerLife = -1;
 new g_cvarTracerWidth = -1;
@@ -18,19 +8,8 @@ new bool:g_bRandom[STORE_MAX_ITEMS];
 new g_iColors = 0;
 new g_iBeam = -1;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Tracers_OnPluginStart()
-#endif
 {	
-#if defined STANDALONE_BUILD
-	// TF2 is unsupported
-	new String:m_szGameDir[32];
-	GetGameFolderName(m_szGameDir, sizeof(m_szGameDir));
-	if(strcmp(m_szGameDir, "tf")==0)
-		GAME_TF2 = true;
-#endif
 
 	if(GAME_TF2)
 		return;

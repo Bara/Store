@@ -1,17 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-new bool:GAME_CSGO = false;
-new bool:GAME_TF2 = false;
-#endif
-
-#if defined REQUIRE_PLUGIN
-#undef REQUIRE_PLUGIN
-#endif
 #include <hidetrails>
 
 enum Trail
@@ -40,21 +26,8 @@ new g_cvarTrailLife = -1;
 
 new g_iTrailOwners[2048]={-1};
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Trails_OnPluginStart()
-#endif
 {
-#if defined STANDALONE_BUILD
-	new String:m_szGameDir[32];
-	GetGameFolderName(m_szGameDir, sizeof(m_szGameDir));
-	
-	if(strcmp(m_szGameDir, "csgo")==0)
-		GAME_CSGO = true;
-	else if(strcmp(m_szGameDir, "tf")==0)
-		GAME_TF2 = true;
-#endif
 	g_cvarPadding = RegisterConVar("sm_store_trails_padding", "30.0", "Space between two trails", TYPE_FLOAT);
 	g_cvarMaxColumns = RegisterConVar("sm_store_trails_columns", "3", "Number of columns before starting to increase altitude", TYPE_INT);
 	g_cvarTrailLife = RegisterConVar("sm_store_trails_life", "1.0", "Life of a trail in seconds", TYPE_FLOAT);
@@ -252,11 +225,7 @@ public AttachTrail(ent, client, current, num)
 	SetEntPropVector(client, Prop_Data, "m_angAbsRotation", m_fAngle);
 }
 
-#if defined STANDALONE_BUILD
-public OnGameFrame()
-#else
 public Trails_OnGameFrame()
-#endif
 {
 	if(!GAME_CSGO)
 		return;

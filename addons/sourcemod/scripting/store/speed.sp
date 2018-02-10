@@ -1,21 +1,9 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 new g_iSpeedIdx = 0;
 
 new Float:g_fSpeed[STORE_MAX_ITEMS];
 new Float:g_fSpeedTime[STORE_MAX_ITEMS];
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Speed_OnPluginStart()
-#endif
 {
 	Store_RegisterHandler("speed", "", Speed_OnMapStart, Speed_Reset, Speed_Config, Speed_Equip, Speed_Remove, false);
 }

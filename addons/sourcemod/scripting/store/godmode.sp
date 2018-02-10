@@ -1,11 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 new Float:g_flGodmodes[STORE_MAX_ITEMS];
 new g_iGodmodes = 0;
 new g_iGodmodeRoundLimit[MAXPLAYERS+1] = {0,...};
@@ -13,11 +5,7 @@ new g_iGodmodeRoundLimit[MAXPLAYERS+1] = {0,...};
 new g_cvarGodmodeRoundLimit = -1;
 new g_cvarGodmodeTeam = -1;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Godmode_OnPluginStart()
-#endif
 {
 	Store_RegisterHandler("godmode", "", Godmode_OnMapStart, Godmode_Reset, Godmode_Config, Godmode_Equip, Godmode_Remove, false);
 
@@ -25,24 +13,10 @@ public Godmode_OnPluginStart()
 	g_cvarGodmodeTeam = RegisterConVar("sm_store_godmode_team", "0", "Team that can use godmode. 0=Any 2=Terrorist 3=Counter-Terrorist", TYPE_INT);
 }
 
-#if defined STANDALONE_BUILD
-public Action:Godmode_OnPlayerSpwan(Handle:event, const String:name[], bool:dontBroadcast)
-#else
 public Godmode_OnPlayerSpawn(client)
-#endif
 {
-#if defined STANDALONE_BUILD
-	new client = GetClientOfUserId(GetEventInt(event, "userid"));
-
-	if(!IsClientInGame(client))
-		return Plugin_Continue;
-#endif
-
 	g_iGodmodeRoundLimit[client] = 0;
 
-#if defined STANDALONE_BUILD
-	return Plugin_Continue;
-#endif
 }
 
 public Godmode_OnMapStart()

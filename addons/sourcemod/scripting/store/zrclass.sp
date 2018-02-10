@@ -1,16 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-new GAME_TF2 = false;
-
-native bool:ZR_IsClientZombie(client);
-new bool:g_bZombieMode = false;
-#endif
-
 native bool:ZR_IsClientHuman(client);
 native ZR_GetClassByName(const String:className[], cacheType = 0);
 native ZR_SelectClientClass(client, classIndex, bool:applyIfPossible = true, bool:saveIfEnabled = true);
@@ -34,15 +21,8 @@ new g_eZRClasses[STORE_MAX_ITEMS][ZRClass];
 
 new g_iZRClasses = 0;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public ZRClass_OnPluginStart()
-#endif
 {
-#if defined STANDALONE_BUILD
-	LoadTranslations("store.phrases");
-#endif
 	
 	Store_RegisterHandler("zrclass", "class", ZRClass_OnMapStart, ZRClass_Reset, ZRClass_Config, ZRClass_Equip, ZRClass_Remove, true);
 
@@ -52,36 +32,17 @@ public ZRClass_OnPluginStart()
 	g_bZombieMode = (FindPluginByFile("zombiereloaded")==INVALID_HANDLE?false:true);
 }
 
-#if defined STANDALONE_BUILD
-public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
-{
-	MarkNativeAsOptional("ZR_IsClientZombie");
-	MarkNativeAsOptional("ZR_IsClientHuman");
-	MarkNativeAsOptional("ZR_GetClassByName");
-	MarkNativeAsOptional("ZR_SelectClientClass");
-	return APLRes_Success;
-} 
-#endif
-
 public ZRClass_OnMapStart()
 {
 }
 
-#if defined STANDALONE_BUILD
-public OnLibraryAdded(const String:name[])
-#else
 public ZRClass_OnLibraryAdded(const String:name[])
-#endif
 {
 	if(strcmp(name, "zombiereloaded")==0)
 		g_bZombieMode = true;
 }
 
-#if defined STANDALONE_BUILD
-public OnClientConnected(client)
-#else
 public ZRClass_OnClientConnected(client)
-#endif
 {
 	g_iClientClasses[client][0] = -1;
 	g_iClientClasses[client][1] = -1;

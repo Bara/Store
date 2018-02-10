@@ -1,11 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 new g_iGravity[STORE_MAX_ITEMS];
 new g_iGravityIdx = 0;
 
@@ -13,11 +5,7 @@ new Float:g_fGravityTime[STORE_MAX_ITEMS];
 
 new Handle:g_hGravity = INVALID_HANDLE;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Gravity_OnPluginStart()
-#endif
 {
 	Store_RegisterHandler("gravity", "", Gravity_OnMapStart, Gravity_Reset, Gravity_Config, Gravity_Equip, Gravity_Remove, false);
 

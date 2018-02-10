@@ -1,26 +1,10 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <gifts>
-#include <zephstocks>
-#endif
-
 new g_cvarGiftsEnabled = -1;
 new g_cvarGiftsMinimum = -1;
 new g_cvarGiftsMaximum = -1;
 new g_cvarGiftsFlag = -1;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Gifts_OnPluginStart()
-#endif
 {
-#if defined STANDALONE_BUILD
-	LoadTranslations("store.phrases");
-#endif
 
 	if(FindPluginByFile("gifts.smx")==INVALID_HANDLE)
 	{

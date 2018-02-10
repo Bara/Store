@@ -1,15 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-#include <sdkhooks>
-
-new bool:GAME_TF2 = false;
-#endif
-
 enum GrenadeSkin
 {
 	String:szModel[PLATFORM_MAX_PATH],
@@ -25,27 +13,14 @@ new String:g_szSlots[16][64];
 new g_iGrenadeSkins = 0;
 new g_iSlots = 0;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public GrenadeSkins_OnPluginStart()
-#endif
 {
-#if !defined STANDALONE_BUILD
-	// This is not a standalone build, we don't want grenade skins to kill the whole plugin for us	
-	if(GetExtensionFileStatus("sdkhooks.ext")!=1)
-	{
-		LogError("SDKHooks isn't installed or failed to load. Grenade Skins will be disabled. Please install SDKHooks. (https://forums.alliedmods.net/showthread.php?t=106748)");
-		return;
-	}
-#else
 	// TF2 is unsupported
 	new String:m_szGameDir[32];
 	GetGameFolderName(m_szGameDir, sizeof(m_szGameDir));
 	
 	if(strcmp(m_szGameDir, "tf")==0)
 		GAME_TF2 = true;
-#endif
 	
 	Store_RegisterHandler("grenadeskin", "model", GrenadeSkins_OnMapStart, GrenadeSkins_Reset, GrenadeSkins_Config, GrenadeSkins_Equip, GrenadeSkins_Remove, true);
 }
@@ -100,11 +75,7 @@ public GrenadeSkins_GetSlot(String:weapon[])
 	return g_iSlots++;
 }
 
-#if defined STANDALONE_BUILD
-public OnEntityCreated(entity, const String:classname[])
-#else
 public GrenadeSkins_OnEntityCreated(entity, const String:classname[])
-#endif
 {
 	if(g_iGrenadeSkins == 0)
 		return;

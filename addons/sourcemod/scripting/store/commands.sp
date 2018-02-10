@@ -1,22 +1,10 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 new String:g_szCommands[STORE_MAX_ITEMS][128];
 new String:g_szCommandsOff[STORE_MAX_ITEMS][128];
 new g_unCommandsTime[STORE_MAX_ITEMS];
 
 new g_iCommands = 0;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Commands_OnPluginStart()
-#endif
 {
 	Store_RegisterHandler("command", "", Commands_OnMapStart, Commands_Reset, Commands_Config, Commands_Equip, Commands_Remove, false);
 }

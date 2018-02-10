@@ -1,16 +1,4 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Attributes_OnPluginStart()
-#endif
 {
 	HookEvent("player_spawn", Attributes_PlayerSpawn);
 }

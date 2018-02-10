@@ -1,31 +1,10 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-new bool:GAME_CSGO = false;
-#endif
-
 new String:g_szHelpTitle[STORE_MAX_ITEMS][256];
 new String:g_szHelp[STORE_MAX_ITEMS][256];
 
 new g_iHelp = 0;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Help_OnPluginStart()
-#endif
 {
-#if defined STANDALONE_BUILD
-	new String:m_szGameDir[32];
-	GetGameFolderName(m_szGameDir, sizeof(m_szGameDir));
-	
-	if(strcmp(m_szGameDir, "csgo")==0)
-		GAME_CSGO = true;
-#endif
 	Store_RegisterHandler("help", "", Help_OnMapStart, Help_Reset, Help_Config, Help_Equip, Help_Remove, false, true);
 }
 

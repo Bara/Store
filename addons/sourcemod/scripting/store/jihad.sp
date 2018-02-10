@@ -1,11 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 enum Jihad
 {
 	Float:flRadius,
@@ -25,11 +17,7 @@ new g_cvarJihadTeam = -1;
 new g_cvarJihadExplosionSound = -1;
 new g_cvarJihadBeforeSound = -1;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Jihad_OnPluginStart()
-#endif
 {
 	Store_RegisterHandler("jihad", "", Jihad_OnMapStart, Jihad_Reset, Jihad_Config, Jihad_Equip, Jihad_Remove, false);
 

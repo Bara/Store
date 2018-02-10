@@ -1,13 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-#include <sdkhooks>
-#endif
-
 enum GrenadeTrail
 {
 	String:szMaterial[PLATFORM_MAX_PATH],
@@ -23,21 +13,8 @@ new g_eGrenadeTrails[STORE_MAX_ITEMS][GrenadeTrail];
 
 new g_iGrenadeTrails = 0;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public GrenadeTrails_OnPluginStart()
-#endif
 {
-#if !defined STANDALONE_BUILD
-	// This is not a standalone build, we don't want grenade trails to kill the whole plugin for us	
-	if(GetExtensionFileStatus("sdkhooks.ext")!=1)
-	{
-		LogError("SDKHooks isn't installed or failed to load. Grenade Trails will be disabled. Please install SDKHooks. (https://forums.alliedmods.net/showthread.php?t=106748)");
-		return;
-	}
-#endif
-	
 	Store_RegisterHandler("grenadetrail", "material", GrenadeTrails_OnMapStart, GrenadeTrails_Reset, GrenadeTrails_Config, GrenadeTrails_Equip, GrenadeTrails_Remove, true);
 }
 
@@ -84,11 +61,7 @@ public GrenadeTrails_Remove(client, id)
 	return 0;
 }
 
-#if defined STANDALONE_BUILD
-public OnEntityCreated(entity, const String:classname[])
-#else
 public GrenadeTrails_OnEntityCreated(entity, const String:classname[])
-#endif
 {
 	if(g_iGrenadeTrails == 0)
 		return;

@@ -1,15 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-#include <tf2>
-#include <tf2_stocks>
-#include <tf2items>
-#endif
-
 enum TFWeapon
 {
 	String:m_szEntity[64],
@@ -54,23 +42,11 @@ new Handle:g_hRemoveTimer[MAXPLAYERS+1]={INVALID_HANDLE};
 new g_bTFHide[2048]={false};
 new bool:g_bTF2Enabled = true;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public TFSupport_OnPluginStart()
-#endif
 {
-#if defined STANDALONE_BUILD
-	new String:m_szGameDir[32];
-	GetGameFolderName(m_szGameDir, sizeof(m_szGameDir));
-	
-	if(strcmp(m_szGameDir, "tf")==0)
-		GAME_TF2 = true;
-#endif
 	if(!GAME_TF2)
 		return;	
 
-#if !defined STANDALONE_BUILD
 	// This is not a standalone build, we don't want hats to kill the whole plugin for us	
 	if(GetExtensionFileStatus("tf2items.ext")!=1)
 	{
@@ -78,7 +54,6 @@ public TFSupport_OnPluginStart()
 		LogError("TF2Items isn't installed or failed to load. TF2 support will be disabled. Please install TF2Items. (https://forums.alliedmods.net/showthread.php?t=115100)");
 		return;
 	}
-#endif
 
 	if(!TFSupport_ReadItemSchema())
 		return;
@@ -843,14 +818,3 @@ public TFWeaponSize_ResizeWeapon(client)
 		}
 	}
 }
-
-#if defined STANDALONE_BUILD
-public Bonemerge(ent)
-{
-	new m_iEntEffects = GetEntProp(ent, Prop_Send, "m_fEffects"); 
-	m_iEntEffects &= ~32;
-	m_iEntEffects |= 1;
-	m_iEntEffects |= 128;
-	SetEntProp(ent, Prop_Send, "m_fEffects", m_iEntEffects); 
-}
-#endif

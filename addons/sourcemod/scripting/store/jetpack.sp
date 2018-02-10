@@ -1,11 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 new g_cvarFuel = -1;
 new g_cvarRegen = -1;
 new g_cvarMinimum = -1;
@@ -18,11 +10,7 @@ new Float:g_fLastHUDTime[MAXPLAYERS+1];
 
 new bool:g_bJetpacking[MAXPLAYERS+1]={false,...};
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Jetpack_OnPluginStart()
-#endif
 {
 	Store_RegisterHandler("jetpack", "", Jetpack_OnMapStart, Jetpack_Reset, Jetpack_Config, Jetpack_Equip, Jetpack_Remove, true);
 
@@ -83,19 +71,11 @@ public Action:Command_JetpackOff(client, args)
 	return Plugin_Handled;
 }
 
-#if defined STANDALONE_BUILD
-public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:angles[3], &weapon)
-#else
 public Jetpack_OnPlayerRunCmd(client, buttons)
-#endif
 {
 	new m_iEquipped = Store_GetEquippedItem(client, "jetpack");
 	if(m_iEquipped < 0)
-#if defined STANDALONE_BUILD
-		return Plugin_Continue;
-#else
 		return;
-#endif
 
 	new Float:m_fTime = GetGameTime();	 
 	if (g_bJetpacking[client])
@@ -130,8 +110,4 @@ public Jetpack_OnPlayerRunCmd(client, buttons)
 	}
 	 
 	g_fTime[client] = m_fTime;
-
-#if defined STANDALONE_BUILD
-	return Plugin_Continue;
-#endif
 }

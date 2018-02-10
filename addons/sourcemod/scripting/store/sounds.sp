@@ -1,13 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-new GAME_TF2 = false;
-#endif
-
 enum Sound
 {
 	String:szSound[PLATFORM_MAX_PATH],
@@ -18,19 +8,8 @@ enum Sound
 new g_eSounds[STORE_MAX_ITEMS][Sound];
 new g_iSounds = 0;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Sounds_OnPluginStart()
-#endif
 {
-#if defined STANDALONE_BUILD
-	new String:m_szGameDir[32];
-	GetGameFolderName(m_szGameDir, sizeof(m_szGameDir));
-		
-	LoadTranslations("store.phrases");
-#endif
-	
 	Store_RegisterHandler("sound", "path", Sounds_OnMapStart, Sounds_Reset, Sounds_Config, Sounds_Equip, Sounds_Remove, false);
 
 	HookEvent("player_say", Sounds_PlayerSay);

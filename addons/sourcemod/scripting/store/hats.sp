@@ -1,18 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <zephstocks>
-
-#include <sdkhooks>
-#include <thirdperson>
-
-#undef REQUIRE_EXTENSIONS
-#include <store>
-
-new bool:GAME_TF2 = false;
-#endif
-
 enum Hat
 {
 	String:szModel[PLATFORM_MAX_PATH],
@@ -38,26 +23,13 @@ new g_cvarOverrideEnabled = -1;
 new bool:g_bTOverride = false;
 new bool:g_bCTOverride = false;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Hats_OnPluginStart()
-#endif
 {
-#if !defined STANDALONE_BUILD
-	// This is not a standalone build, we don't want hats to kill the whole plugin for us	
-	if(GetExtensionFileStatus("sdkhooks.ext")!=1)
-	{
-		LogError("SDKHooks isn't installed or failed to load. Hats will be disabled. Please install SDKHooks. (https://forums.alliedmods.net/showthread.php?t=106748)");
-		return;
-	}
-#else
 	// TF2 is unsupported
 	new String:m_szGameDir[32];
 	GetGameFolderName(m_szGameDir, sizeof(m_szGameDir));
 	if(strcmp(m_szGameDir, "tf")==0)
 		GAME_TF2 = true;
-#endif
 
 	if(GAME_TF2)
 		return;

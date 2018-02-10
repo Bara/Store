@@ -1,19 +1,7 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 new String:g_szDoors[STORE_MAX_ITEMS][64];
 new g_iDoorsIdx = 0;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Doors_OnPluginStart()
-#endif
 {
 	Store_RegisterHandler("door", "", Doors_OnMapStart, Doors_Reset, Doors_Config, Doors_Equip, Doors_Remove, false);
 }

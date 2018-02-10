@@ -1,12 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#include <chat-processor>
-#endif
-
 new String:g_szNameTags[STORE_MAX_ITEMS][MAXLENGTH_NAME];
 new String:g_szNameColors[STORE_MAX_ITEMS][32];
 new String:g_szMessageColors[STORE_MAX_ITEMS][32];
@@ -15,11 +6,7 @@ new g_iNameTags = 0;
 new g_iNameColors = 0;
 new g_iMessageColors = 0;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public CPSupport_OnPluginStart()
-#endif
 {	
 	if(FindPluginByFile("chat-processor.smx")==INVALID_HANDLE)
 	{

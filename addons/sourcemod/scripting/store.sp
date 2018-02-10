@@ -24,7 +24,6 @@
 #include <donate>
 #include <adminmenu>
 #include <multicolors>
-#if !defined STANDALONE_BUILD
 #include <sdkhooks>
 #include <cstrike>
 #include <tf2>
@@ -34,7 +33,6 @@
 #include <chat-processor>
 #include <thirdperson>
 #include <saxtonhale>
-#endif
 
 //////////////////////////////
 //			ENUMS			//
@@ -142,7 +140,6 @@ new SilentChatTrigger = 0;
 //			MODULES			//
 //////////////////////////////
 
-#if !defined STANDALONE_BUILD
 #include "store/hats.sp"
 #include "store/tracers.sp"
 #include "store/playerskins.sp"
@@ -177,7 +174,6 @@ new SilentChatTrigger = 0;
 #include "store/sprays.sp"
 #include "store/admin.sp"
 #include "store/glow.sp"
-#endif
 
 //////////////////////////////////
 //		PLUGIN DEFINITION		//
@@ -285,7 +281,6 @@ public OnPluginStart()
 	g_iPackageHandler = Store_RegisterHandler("package", "", INVALID_FUNCTION, INVALID_FUNCTION, INVALID_FUNCTION, INVALID_FUNCTION, INVALID_FUNCTION);
 
 	// Initialize the modules	
-#if !defined STANDALONE_BUILD
 	Hats_OnPluginStart();
 	Tracers_OnPluginStart();
 	Trails_OnPluginStart();
@@ -320,7 +315,6 @@ public OnPluginStart()
 	Sprays_OnPluginStart();
 	AdminGroup_OnPluginStart();
 	Glow_OnPluginStart();
-#endif
 
 	new Handle:topmenu;
 	if (LibraryExists("adminmenu") && ((topmenu = GetAdminTopMenu()) != INVALID_HANDLE))
@@ -401,23 +395,20 @@ public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
 	CreateNative("Store_HasClientItem", Native_HasClientItem);
 	CreateNative("Store_IterateEquippedItems", Native_IterateEquippedItems);
 
-#if !defined STANDALONE_BUILD
 	MarkNativeAsOptional("ZR_IsClientZombie");
 	MarkNativeAsOptional("ZR_IsClientHuman");
 	MarkNativeAsOptional("ZR_GetClassByName");
 	MarkNativeAsOptional("ZR_SelectClientClass");
 	MarkNativeAsOptional("HideTrails_ShouldHide");
-#endif
+
 	return APLRes_Success;
 } 
 
-#if !defined STANDALONE_BUILD
 public OnLibraryAdded(const String:name[])
 {
 	PlayerSkins_OnLibraryAdded(name);
 	ZRClass_OnLibraryAdded(name);
 }
-#endif
 
 //////////////////////////////
 //		 ADMIN MENUS		//
@@ -682,22 +673,18 @@ public OnConfigsExecuted()
 	CSetPrefix(CHAT_TAG);
 }
 
-#if !defined STANDALONE_BUILD
 public OnGameFrame()
 {
 	Trails_OnGameFrame();
 	TFWeapon_OnGameFrame();
 	TFHead_OnGameFrame();
 }
-#endif
 
-#if !defined STANDALONE_BUILD
 public OnEntityCreated(entity, const String:classname[])
 {
 	GrenadeSkins_OnEntityCreated(entity, classname);
 	GrenadeTrails_OnEntityCreated(entity, classname);
 }
-#endif
 
 //////////////////////////////
 //			NATIVES			//
@@ -1047,14 +1034,12 @@ public OnClientConnected(client)
 		}
 	}
 
-#if !defined STANDALONE_BUILD
 	PlayerSkins_OnClientConnected(client);
 	Jetpack_OnClientConnected(client);
 	ZRClass_OnClientConnected(client);
 	Pets_OnClientConnected(client);
 	Sprays_OnClientConnected(client);
 	Glow_OnClientConnected(client);
-#endif
 }
 
 public OnClientPostAdminCheck(client)
@@ -1064,25 +1049,21 @@ public OnClientPostAdminCheck(client)
 	Store_LoadClientInventory(client);
 }
 
-#if !defined STANDALONE_BUILD
 public OnClientPutInServer(client)
 {
 	if(IsFakeClient(client))
 		return;
 	WeaponColors_OnClientPutInServer(client);
 }
-#endif
 
 public OnClientDisconnect(client)
 {
 	if(IsFakeClient(client))
 		return;
 	
-#if !defined STANDALONE_BUILD
 	Betting_OnClientDisconnect(client);
 	Pets_OnClientDisconnect(client);
 	Glow_OnClientDisconnect(client);
-#endif
 
 	Store_SaveClientData(client);
 	Store_SaveClientInventory(client);
@@ -1097,7 +1078,6 @@ public OnClientSettingsChanged(client)
 		SQL_EscapeString(g_hDatabase, g_eClients[client][szName], g_eClients[client][szNameEscaped], 128);
 }
 
-#if !defined STANDALONE_BUILD
 public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:angles[3], &weapon, &subtype, &cmdnum, &tickcount, &seed, mouse[2])
 {
 	if(!IsClientInGame(client))
@@ -1113,7 +1093,6 @@ public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:ang
 
 	return m_iRet;
 }
-#endif
 
 //////////////////////////////
 //			EVENTS			//
@@ -1152,9 +1131,7 @@ public Action:Event_PlayerSpawn(Handle:event, const String:name[], bool:dontBroa
 	if(!IsClientInGame(client))
 		return Plugin_Continue;
 
-#if !defined STANDALONE_BUILD
 	Health_OnPlayerSpawn(client);
-#endif
 		
 	return Plugin_Continue;
 }

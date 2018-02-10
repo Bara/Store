@@ -1,11 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 enum Glow
 {
 	String:szColor[16],
@@ -20,11 +12,7 @@ new g_iGlow = 0;
 new g_unClientGlow[MAXPLAYERS+1] = {INVALID_ENT_REFERENCE, ...};
 new g_unSelectedGlow[MAXPLAYERS+1]={-1,...};
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Glow_OnPluginStart()
-#endif
 {
 	Store_RegisterHandler("glow", "color", Glow_OnMapStart, Glow_Reset, Glow_Config, Glow_Equip, Glow_Remove, true);
 

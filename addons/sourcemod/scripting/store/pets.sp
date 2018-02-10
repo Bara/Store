@@ -1,11 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-#endif
-
 enum Pet
 {
 	String:model[PLATFORM_MAX_PATH],
@@ -21,20 +13,9 @@ new g_unClientPet[MAXPLAYERS+1] = {INVALID_ENT_REFERENCE, ...};
 new g_unSelectedPet[MAXPLAYERS+1]={-1,...};
 new g_unLastAnimation[MAXPLAYERS+1]={-1,...};
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public Pets_OnPluginStart()
-#endif
 {
 
-#if defined STANDALONE_BUILD
-	new String:m_szGameDir[32];
-	GetGameFolderName(m_szGameDir, sizeof(m_szGameDir));
-	
-	if(strcmp(m_szGameDir, "tf")==0)
-		GAME_TF2 = true;
-#endif
 	if(GAME_TF2)
 		return;	
 

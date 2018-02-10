@@ -1,13 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-new GAME_TF2 = false;
-#endif
-
 native bool:ZR_IsClientZombie(client);
 new bool:g_bZombieMode = false;
 
@@ -35,22 +25,8 @@ new g_cvarSkinDelay = -1;
 new bool:g_bTForcedSkin = false;
 new bool:g_bCTForcedSkin = false;
 
-#if defined STANDALONE_BUILD
-public OnPluginStart()
-#else
 public PlayerSkins_OnPluginStart()
-#endif
 {
-#if defined STANDALONE_BUILD
-	new String:m_szGameDir[32];
-	GetGameFolderName(m_szGameDir, sizeof(m_szGameDir));
-	
-	if(strcmp(m_szGameDir, "tf")==0)
-		GAME_TF2 = true;
-		
-	LoadTranslations("store.phrases");
-#endif
-	
 	Store_RegisterHandler("playerskin", "model", PlayerSkins_OnMapStart, PlayerSkins_Reset, PlayerSkins_Config, PlayerSkins_Equip, PlayerSkins_Remove, true);
 	Store_RegisterHandler("playerskin_temp", "model", PlayerSkins_OnMapStart, PlayerSkins_Reset, PlayerSkins_Config, PlayerSkins_Equip, PlayerSkins_Remove, false);
 
@@ -65,14 +41,6 @@ public PlayerSkins_OnPluginStart()
 
 	g_bZombieMode = (FindPluginByFile("zombiereloaded")==INVALID_HANDLE?false:true);
 }
-
-#if defined STANDALONE_BUILD
-public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
-{
-	MarkNativeAsOptional("ZR_IsClientZombie");
-	return APLRes_Success;
-} 
-#endif
 
 public PlayerSkins_OnMapStart()
 {
@@ -107,21 +75,13 @@ public PlayerSkins_OnMapStart()
 		g_bCTForcedSkin = false;
 }
 
-#if defined STANDALONE_BUILD
-public OnLibraryAdded(const String:name[])
-#else
 public PlayerSkins_OnLibraryAdded(const String:name[])
-#endif
 {
 	if(strcmp(name, "zombiereloaded")==0)
 		g_bZombieMode = true;
 }
 
-#if defined STANDALONE_BUILD
-public OnClientConnected(client)
-#else
 public PlayerSkins_OnClientConnected(client)
-#endif
 {
 	g_iTempSkins[client] = -1;
 }

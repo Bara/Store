@@ -1,12 +1,3 @@
-#if defined STANDALONE_BUILD
-#include <sourcemod>
-#include <sdktools>
-
-#include <store>
-#include <zephstocks>
-
-#endif
-
 enum AdminItem
 {
 	String:szFlags[32],
