@@ -12,6 +12,6 @@ echo -e "\nCompile plugins"
 echo -e "Compiling addons/sourcemod/scripting/store.sp..."
 addons/sourcemod/scripting/spcomp -O2 -v2 addons/sourcemod/scripting/store.sp
 echo -e "\nCompiling addons/sourcemod/scripting/store-trade.sp..."
-addons/sourcemod/scripting/spcomp -O2 -v2 addons/sourcemod/scripting/trade.sp
+addons/sourcemod/scripting/spcomp -O2 -v2 addons/sourcemod/scripting/store-trade.sp
 echo -e "\nCompiling addons/sourcemod/scripting/thirdperson.sp..."
 addons/sourcemod/scripting/spcomp -O2 -v2 addons/sourcemod/scripting/thirdperson.sp
