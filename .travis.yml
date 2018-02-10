@@ -1,0 +1,26 @@
+os: linux
+dist: trusty
+sudo: false
+language: c
+
+addons:
+  apt:
+    packages:
+    - lftp
+    - lib32z1
+    - lib32stdc++6
+
+env:
+  - VERSION=1.8
+  - VERSION=1.9
+  - VERSION=1.10
+
+matrix:
+  allow_failures:
+    - env: VERSION=1.10
+
+script:
+  - bash ci/test.sh $VERSION
+
+notifications:
+  email: false
