@@ -36,7 +36,7 @@ public Doors_Equip(client, id)
 	{
 		if(!IsValidEdict(i) || !IsValidEntity(i))
 			continue;
-		GetEntPropString(i, Prop_Data, "m_iName", STRING(m_szName));
+		GetEntPropString(i, Prop_Data, "m_iName", m_szName, sizeof(m_szName));
 		if(strcmp(m_szName, g_szDoors[m_iData])==0)
 		{
 			AcceptEntityInput(i, "Open");

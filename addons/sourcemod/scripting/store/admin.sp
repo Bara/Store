@@ -28,7 +28,7 @@ public AdminGroup_Config(&Handle:kv, itemid)
 
 	new String:group[64];
 	KvGetString(kv, "flags", g_eAdmins[g_iAdmins][szFlags], 32);
-	KvGetString(kv, "group", STRING(group));
+	KvGetString(kv, "group", group, sizeof(group));
 
 	g_eAdmins[g_iAdmins][nGroup]=FindAdmGroup(group);
 	g_eAdmins[g_iAdmins][nImmunity]=KvGetNum(kv, "immunity");
@@ -55,7 +55,7 @@ public AdminGroup_Equip(client, id)
 		SetAdminImmunityLevel(Admin,  g_eAdmins[data][nImmunity]);
 
 	new String:tmp[32];
-	strcopy(STRING(tmp), g_eAdmins[data][szFlags]);
+	strcopy(tmp, sizeof(tmp), g_eAdmins[data][szFlags]);
 	new len = strlen(tmp);
 	new AdminFlag:flag;
 	for (new i=0; i<len; i++)

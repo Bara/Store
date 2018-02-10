@@ -34,25 +34,25 @@ public Commands_Equip(client, id)
 {
 	new m_iData = Store_GetDataIndex(id);
 	decl String:m_szCommand[256];
-	strcopy(STRING(m_szCommand), g_szCommands[m_iData]);
+	strcopy(m_szCommand, sizeof(m_szCommand), g_szCommands[m_iData]);
 
 	decl String:m_szClientID[11];
 	decl String:m_szUserID[11];
 	new String:m_szSteamID[32] = "\"";
 	new String:m_szName[66] = "\"";
 
-	IntToString(client, STRING(m_szClientID));
-	IntToString(GetClientUserId(client), STRING(m_szUserID));
+	IntToString(client, m_szClientID, sizeof(m_szClientID));
+	IntToString(GetClientUserId(client), m_szUserID, sizeof(m_szUserID));
 	GetClientAuthId(client, AuthId_Steam2, m_szSteamID[1], sizeof(m_szSteamID)-1);
 	GetClientName(client, m_szName[1], sizeof(m_szName)-1);
 
 	m_szSteamID[strlen(m_szSteamID)] = '"';
 	m_szName[strlen(m_szName)] = '"';
 
-	ReplaceString(STRING(m_szCommand), "{clientid}", m_szClientID);
-	ReplaceString(STRING(m_szCommand), "{userid}", m_szUserID);
-	ReplaceString(STRING(m_szCommand), "{steamid}", m_szSteamID);
-	ReplaceString(STRING(m_szCommand), "{name}", m_szName);
+	ReplaceString(m_szCommand, sizeof(m_szCommand), "{clientid}", m_szClientID);
+	ReplaceString(m_szCommand, sizeof(m_szCommand), "{userid}", m_szUserID);
+	ReplaceString(m_szCommand, sizeof(m_szCommand), "{steamid}", m_szSteamID);
+	ReplaceString(m_szCommand, sizeof(m_szCommand), "{name}", m_szName);
 
 	ServerCommand("%s", m_szCommand);
 
@@ -81,7 +81,7 @@ public Action:Timer_CommandOff(Handle:timer, any:data)
 	CloseHandle(data);
 
 	decl String:m_szCommand[256];
-	strcopy(STRING(m_szCommand), g_szCommandsOff[m_iData]);
+	strcopy(m_szCommand, sizeof(m_szCommand), g_szCommandsOff[m_iData]);
 
 	decl String:m_szClientID[11];
 	decl String:m_szUserID[11];
@@ -90,8 +90,8 @@ public Action:Timer_CommandOff(Handle:timer, any:data)
 
 	if(client)
 	{
-		IntToString(client, STRING(m_szClientID));
-		IntToString(GetClientUserId(client), STRING(m_szUserID));
+		IntToString(client, m_szClientID, sizeof(m_szClientID));
+		IntToString(GetClientUserId(client), m_szUserID, sizeof(m_szUserID));
 		GetClientAuthId(client, AuthId_Steam2, m_szSteamID[1], sizeof(m_szSteamID)-1);
 		GetClientName(client, m_szName[1], sizeof(m_szName)-1);
 	}
@@ -99,10 +99,10 @@ public Action:Timer_CommandOff(Handle:timer, any:data)
 	m_szSteamID[strlen(m_szSteamID)] = '"';
 	m_szName[strlen(m_szName)] = '"';
 
-	ReplaceString(STRING(m_szCommand), "{clientid}", m_szClientID);
-	ReplaceString(STRING(m_szCommand), "{userid}", m_szUserID);
-	ReplaceString(STRING(m_szCommand), "{steamid}", m_szSteamID);
-	ReplaceString(STRING(m_szCommand), "{name}", m_szName);
+	ReplaceString(m_szCommand, sizeof(m_szCommand), "{clientid}", m_szClientID);
+	ReplaceString(m_szCommand, sizeof(m_szCommand), "{userid}", m_szUserID);
+	ReplaceString(m_szCommand, sizeof(m_szCommand), "{steamid}", m_szSteamID);
+	ReplaceString(m_szCommand, sizeof(m_szCommand), "{name}", m_szName);
 
 	ServerCommand("%s", m_szCommand);
 

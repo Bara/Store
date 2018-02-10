@@ -452,7 +452,7 @@ public TFWeapon_CreateChild(client, idx)
 	DispatchSpawn(parent);
 
 	decl String:m_szModelName[PLATFORM_MAX_PATH];
-	GetEntPropString(client, Prop_Data, "m_ModelName", STRING(m_szModelName));
+	GetEntPropString(client, Prop_Data, "m_ModelName", m_szModelName, sizeof(m_szModelName));
 	SetEntityModel(parent, m_szModelName);
 
 	g_iClientWeapons[client][0]=parent;

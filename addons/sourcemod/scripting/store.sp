@@ -197,7 +197,7 @@ public OnPluginStart()
 	RegPluginLibrary("store_zephyrus");
 
 	// Identify the game
-	GetGameFolderName(STRING(g_szGameDir));
+	GetGameFolderName(g_szGameDir, sizeof(g_szGameDir));
 	
 	if(strcmp(g_szGameDir, "cstrike")==0)
 		GAME_CSS = true;
@@ -478,8 +478,8 @@ public AdminMenu_ResetPlayer(Handle:topmenu, TopMenuAction:action, TopMenuObject
 		{
 			decl String:m_szName[64];
 			decl String:m_szAuthId[32];
-			GetClientName(i, STRING(m_szName));
-			GetLegacyAuthString(i, STRING(m_szAuthId));
+			GetClientName(i, m_szName, sizeof(m_szName));
+			GetLegacyAuthString(i, m_szAuthId, sizeof(m_szAuthId));
 			AddMenuItem(m_hMenu, m_szAuthId, m_szName);
 		}
 		DisplayMenu(m_hMenu, client, 0);
@@ -498,10 +498,10 @@ public MenuHandler_ResetPlayer(Handle:menu, MenuAction:action, client, param2)
 		{
 			decl style;
 			decl String:m_szName[64];
-			GetMenuItem(menu, param2, g_szClientData[client], sizeof(g_szClientData[]), style, STRING(m_szName));
+			GetMenuItem(menu, param2, g_szClientData[client], sizeof(g_szClientData[]), style, m_szName, sizeof(m_szName));
 
 			decl String:m_szTitle[256];
-			Format(STRING(m_szTitle), "Do you want to reset %s?", m_szName);
+			Format(m_szTitle, sizeof(m_szTitle), "Do you want to reset %s?", m_szName);
 			Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_ResetPlayer, 0);
 		}
 	}
@@ -529,8 +529,8 @@ public AdminMenu_GiveCredits(Handle:topmenu, TopMenuAction:action, TopMenuObject
 		{
 			decl String:m_szName[64];
 			decl String:m_szAuthId[32];
-			GetClientName(i, STRING(m_szName));
-			GetLegacyAuthString(i, STRING(m_szAuthId));
+			GetClientName(i, m_szName, sizeof(m_szName));
+			GetLegacyAuthString(i, m_szAuthId, sizeof(m_szAuthId));
 			AddMenuItem(m_hMenu, m_szAuthId, m_szName);
 		}
 		DisplayMenu(m_hMenu, client, 0);
@@ -575,7 +575,7 @@ public MenuHandler_GiveCredits2(Handle:menu, MenuAction:action, client, param2)
 	else if (action == MenuAction_Select)
 	{
 		decl String:m_szData[11];
-		GetMenuItem(menu, param2, STRING(m_szData));
+		GetMenuItem(menu, param2, m_szData, sizeof(m_szData));
 		FakeClientCommand(client, "sm_givecredits \"%s\" %s", g_szClientData[client], m_szData);
 		MenuHandler_GiveCredits(INVALID_HANDLE, MenuAction_Select, client, -1);
 	}
@@ -603,8 +603,8 @@ public AdminMenu_ViewInventory(Handle:topmenu, TopMenuAction:action, TopMenuObje
 		{
 			decl String:m_szName[64];
 			decl String:m_szAuthId[32];
-			GetClientName(i, STRING(m_szName));
-			GetLegacyAuthString(i, STRING(m_szAuthId));
+			GetClientName(i, m_szName, sizeof(m_szName));
+			GetLegacyAuthString(i, m_szAuthId, sizeof(m_szAuthId));
 			AddMenuItem(m_hMenu, m_szAuthId, m_szName);
 		}
 		DisplayMenu(m_hMenu, client, 0);
@@ -665,7 +665,7 @@ public OnConfigsExecuted()
 		if(g_hLogFile == INVALID_HANDLE)
 		{
 			new String:m_szPath[PLATFORM_MAX_PATH];
-			BuildPath(Path_SM, STRING(m_szPath), "logs/store.log.txt");
+			BuildPath(Path_SM, m_szPath, sizeof(m_szPath), "logs/store.log.txt");
 			g_hLogFile = OpenFile(m_szPath, "w+");
 		}
 	}
@@ -696,7 +696,7 @@ public Native_RegisterHandler(Handle:plugin, numParams)
 		return -1;
 		
 	decl String:m_szType[32];
-	GetNativeString(1, STRING(m_szType));
+	GetNativeString(1, m_szType, sizeof(m_szType));
 	new m_iHandler = Store_GetTypeHandler(m_szType);	
 	new m_iId = g_iTypeHandlers;
 	
@@ -725,7 +725,7 @@ public Native_RegisterMenuHandler(Handle:plugin, numParams)
 		return -1;
 		
 	decl String:m_szIdentifier[64];
-	GetNativeString(1, STRING(m_szIdentifier));
+	GetNativeString(1, m_szIdentifier, sizeof(m_szIdentifier));
 	new m_iHandler = Store_GetMenuHandler(m_szIdentifier);	
 	new m_iId = g_iMenuHandlers;
 	
@@ -755,7 +755,7 @@ public Native_GetDataIndex(Handle:plugin, numParams)
 public Native_GetEquippedItem(Handle:plugin, numParams)
 {
 	decl String:m_szType[16];
-	GetNativeString(2, STRING(m_szType));
+	GetNativeString(2, m_szType, sizeof(m_szType));
 	
 	new m_iHandler = Store_GetTypeHandler(m_szType);
 	if(m_iHandler == -1)
@@ -839,7 +839,7 @@ public Native_DisplayConfirmMenu(Handle:plugin, numParams)
 {
 	new client = GetNativeCell(1);
 	decl String:title[255];
-	GetNativeString(2, STRING(title));
+	GetNativeString(2, title, sizeof(title));
 	new callback = GetNativeCell(3);
 	new data = GetNativeCell(4);
 
@@ -848,8 +848,8 @@ public Native_DisplayConfirmMenu(Handle:plugin, numParams)
 	SetMenuExitButton(m_hMenu, false);
 	new String:m_szCallback[32];
 	new String:m_szData[11];
-	Format(STRING(m_szCallback), "%d.%d", plugin, callback);
-	IntToString(data, STRING(m_szData));
+	Format(m_szCallback, sizeof(m_szCallback), "%d.%d", plugin, callback);
+	IntToString(data, m_szData, sizeof(m_szData));
 	AddMenuItemEx(m_hMenu, ITEMDRAW_DEFAULT, m_szCallback, "%t", "Confirm_Yes");
 	AddMenuItemEx(m_hMenu, ITEMDRAW_DEFAULT, m_szData, "%t", "Confirm_No");
 	DisplayMenu(m_hMenu, client, 0);
@@ -1146,7 +1146,7 @@ public Action:Command_Say(client, const String:command[], argc)
 	if(argc > 0)
 	{
 		decl String:m_szArg[65];
-		GetCmdArg(1, STRING(m_szArg));
+		GetCmdArg(1, m_szArg, sizeof(m_szArg));
 		if(m_szArg[0] == PublicChatTrigger || m_szArg[0] == SilentChatTrigger)
 		{
 			for(new i=0;i<g_iItems;++i)
@@ -1220,7 +1220,7 @@ public Action:Command_Gift(client, params)
 	}
 	
 	decl String:m_szTmp[64];
-	GetCmdArg(2, STRING(m_szTmp));
+	GetCmdArg(2, m_szTmp, sizeof(m_szTmp));
 	
 	new m_iCredits = StringToInt(m_szTmp);
 	if(g_eClients[client][iCredits]<m_iCredits || m_iCredits<=0)
@@ -1231,9 +1231,9 @@ public Action:Command_Gift(client, params)
 
 	decl bool:m_bTmp;
 	decl m_iTargets[1];
-	GetCmdArg(1, STRING(m_szTmp));
+	GetCmdArg(1, m_szTmp, sizeof(m_szTmp));
 	
-	new m_iClients = ProcessTargetString(m_szTmp, 0, m_iTargets, 1, 0, STRING(m_szTmp), m_bTmp);
+	new m_iClients = ProcessTargetString(m_szTmp, 0, m_iTargets, 1, 0, m_szTmp, sizeof(m_szTmp), m_bTmp);
 	if(m_iClients>2)
 	{
 		CPrintToChat(client, "%t", "Credit Too Many Matches");
@@ -1269,13 +1269,13 @@ public Action:Command_GiveCredits(client, params)
 	}
 	
 	decl String:m_szTmp[64];
-	GetCmdArg(2, STRING(m_szTmp));
+	GetCmdArg(2, m_szTmp, sizeof(m_szTmp));
 	
 	new m_iCredits = StringToInt(m_szTmp);
 
 	decl bool:m_bTmp;
 	decl m_iTargets[1];
-	GetCmdArg(1, STRING(m_szTmp));
+	GetCmdArg(1, m_szTmp, sizeof(m_szTmp));
 
 	new m_iReceiver = -1;
 	if(strncmp(m_szTmp, "STEAM_", 6)==0)
@@ -1286,12 +1286,12 @@ public Action:Command_GiveCredits(client, params)
 		{
 			decl String:m_szQuery[512];
 			if(g_bMySQL)
-				Format(STRING(m_szQuery), "INSERT IGNORE INTO store_players (authid, credits) VALUES (\"%s\", %d) ON DUPLICATE KEY UPDATE credits=credits+%d", m_szTmp[8], m_iCredits, m_iCredits);
+				Format(m_szQuery, sizeof(m_szQuery), "INSERT IGNORE INTO store_players (authid, credits) VALUES (\"%s\", %d) ON DUPLICATE KEY UPDATE credits=credits+%d", m_szTmp[8], m_iCredits, m_iCredits);
 			else
 			{
-				Format(STRING(m_szQuery), "INSERT OR IGNORE INTO store_players (authid) VALUES (\"%s\")", m_szTmp[8]);
+				Format(m_szQuery, sizeof(m_szQuery), "INSERT OR IGNORE INTO store_players (authid) VALUES (\"%s\")", m_szTmp[8]);
 				SQL_TVoid(g_hDatabase, m_szQuery);
-				Format(STRING(m_szQuery), "UPDATE store_players SET credits=credits+%d WHERE authid=\"%s\"", m_iCredits, m_szTmp[8]);
+				Format(m_szQuery, sizeof(m_szQuery), "UPDATE store_players SET credits=credits+%d WHERE authid=\"%s\"", m_iCredits, m_szTmp[8]);
 			}
 			SQL_TVoid(g_hDatabase, m_szQuery);
 			CPrintToChatAll("%t", "Credits Given", m_szTmp[8], m_iCredits);
@@ -1314,7 +1314,7 @@ public Action:Command_GiveCredits(client, params)
 	}
 	else
 	{
-		new m_iClients = ProcessTargetString(m_szTmp, 0, m_iTargets, 1, 0, STRING(m_szTmp), m_bTmp);
+		new m_iClients = ProcessTargetString(m_szTmp, 0, m_iTargets, 1, 0, m_szTmp, sizeof(m_szTmp), m_bTmp);
 		if(m_iClients>2)
 		{
 			if(client)
@@ -1365,7 +1365,7 @@ public Action:Command_ResetPlayer(client, params)
 	decl String:m_szTmp[64];
 	decl bool:m_bTmp;
 	decl m_iTargets[1];
-	GetCmdArg(1, STRING(m_szTmp));
+	GetCmdArg(1, m_szTmp, sizeof(m_szTmp));
 
 	new m_iReceiver = -1;
 	if(strncmp(m_szTmp, "STEAM_", 6)==0)
@@ -1375,13 +1375,13 @@ public Action:Command_ResetPlayer(client, params)
 		if(m_iReceiver == 0)
 		{
 			decl String:m_szQuery[512];
-			Format(STRING(m_szQuery), "SELECT id, authid FROM store_players WHERE authid=\"%s\"", m_szTmp[9]);
+			Format(m_szQuery, sizeof(m_szQuery), "SELECT id, authid FROM store_players WHERE authid=\"%s\"", m_szTmp[9]);
 			SQL_TQuery(g_hDatabase, SQLCallback_ResetPlayer, m_szQuery, g_eClients[client][iUserId]);
 		}
 	}
 	else
 	{	
-		new m_iClients = ProcessTargetString(m_szTmp, 0, m_iTargets, 1, 0, STRING(m_szTmp), m_bTmp);
+		new m_iClients = ProcessTargetString(m_szTmp, 0, m_iTargets, 1, 0, m_szTmp, sizeof(m_szTmp), m_bTmp);
 		if(m_iClients>2)
 		{
 			CPrintToChat(client, "%t", "Credit Too Many Matches");
@@ -1436,9 +1436,9 @@ public Action:Command_CustomCredits(params)
 	}
 
 	new String:tmp[16];
-	GetCmdArg(1, STRING(tmp));
+	GetCmdArg(1, tmp, sizeof(tmp));
 	new flag = ReadFlagString(tmp);
-	GetCmdArg(2, STRING(tmp));
+	GetCmdArg(2, tmp, sizeof(tmp));
 	new Float:mult = StringToFloat(tmp);
 
 	new size = GetArraySize(g_hCustomCredits);
@@ -1542,7 +1542,7 @@ DisplayStoreMenu(client, parent=-1, last=-1)
 				if(g_eCvars[g_cvarShowVIP][aCache] && !GetClientPrivilege(target, g_eItems[i][iFlagBits], m_iFlags))
 					m_iStyle = ITEMDRAW_DISABLED;
 				
-				IntToString(i, STRING(m_szId));
+				IntToString(i, m_szId, sizeof(m_szId));
 				if(g_eItems[i][iPrice] == -1 || Store_HasClientItem(target, i))
 					AddMenuItem(m_hMenu, m_szId, g_eItems[i][szName], m_iStyle);
 				else if(!g_bInvMode[client] && g_eItems[i][iPlans]==0 && g_eItems[i][bBuyable])
@@ -1554,7 +1554,7 @@ DisplayStoreMenu(client, parent=-1, last=-1)
 			// This is a normal item
 			else
 			{
-				IntToString(i, STRING(m_szId));
+				IntToString(i, m_szId, sizeof(m_szId));
 				if(Store_HasClientItem(target, i))
 				{
 					if(Store_IsEquipped(target, i))
@@ -1622,7 +1622,7 @@ public MenuHandler_Store(Handle:menu, MenuAction:action, client, param2)
 		else
 		{
 			new String:m_szId[64];
-			GetMenuItem(menu, param2, STRING(m_szId));
+			GetMenuItem(menu, param2, m_szId, sizeof(m_szId));
 			
 			g_iLastSelection[client]=param2;
 			
@@ -1632,7 +1632,7 @@ public MenuHandler_Store(Handle:menu, MenuAction:action, client, param2)
 				if(g_eCvars[g_cvarConfirmation][aCache])
 				{
 					decl String:m_szTitle[128];
-					Format(STRING(m_szTitle), "%t", "Confirm_Sell", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType], RoundToFloor(g_eItems[g_iSelectedItem[client]][iPrice]*Float:g_eCvars[g_cvarSellRatio][aCache]));
+					Format(m_szTitle, sizeof(m_szTitle), "%t", "Confirm_Sell", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType], RoundToFloor(g_eItems[g_iSelectedItem[client]][iPrice]*Float:g_eCvars[g_cvarSellRatio][aCache]));
 					Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_Store, 1);
 					return;
 				}
@@ -1681,7 +1681,7 @@ public MenuHandler_Store(Handle:menu, MenuAction:action, client, param2)
 						if(g_eCvars[g_cvarConfirmation][aCache])
 						{
 							decl String:m_szTitle[128];
-							Format(STRING(m_szTitle), "%t", "Confirm_Buy", g_eItems[m_iId][szName], g_eTypeHandlers[g_eItems[m_iId][iHandler]][szType]);
+							Format(m_szTitle, sizeof(m_szTitle), "%t", "Confirm_Buy", g_eItems[m_iId][szName], g_eTypeHandlers[g_eItems[m_iId][iHandler]][szType]);
 							Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_Store, 0);
 							return;
 						}
@@ -1734,9 +1734,9 @@ public DisplayItemMenu(client, itemid)
 	new String:m_szTitle[256];
 	new idx = 0;
 	if(m_bEquipped)
-		idx = Format(STRING(m_szTitle), "%t\n%t", "Item Equipped", g_eItems[itemid][szName], "Title Credits", g_eClients[target][iCredits]);
+		idx = Format(m_szTitle, sizeof(m_szTitle), "%t\n%t", "Item Equipped", g_eItems[itemid][szName], "Title Credits", g_eClients[target][iCredits]);
 	else
-		idx = Format(STRING(m_szTitle), "%s\n%t", g_eItems[itemid][szName], "Title Credits", g_eClients[target][iCredits]);
+		idx = Format(m_szTitle, sizeof(m_szTitle), "%s\n%t", g_eItems[itemid][szName], "Title Credits", g_eClients[target][iCredits]);
 
 	new m_iExpiration = Store_GetExpiration(target, itemid);
 	if(m_iExpiration != 0)
@@ -1824,7 +1824,7 @@ public MenuHandler_Plan(Handle:menu, MenuAction:action, client, param2)
 		if(g_eCvars[g_cvarConfirmation][aCache])
 		{
 			decl String:m_szTitle[128];
-			Format(STRING(m_szTitle), "%t", "Confirm_Buy", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType]);
+			Format(m_szTitle, sizeof(m_szTitle), "%t", "Confirm_Buy", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType]);
 			Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_Store, 0);
 			return;
 		}
@@ -1859,7 +1859,7 @@ public MenuHandler_Item(Handle:menu, MenuAction:action, client, param2)
 		else
 		{
 			decl String:m_szId[64];
-			GetMenuItem(menu, param2, STRING(m_szId));
+			GetMenuItem(menu, param2, m_szId, sizeof(m_szId));
 			
 			new m_iId = StringToInt(m_szId);
 			
@@ -1905,7 +1905,7 @@ public MenuHandler_Item(Handle:menu, MenuAction:action, client, param2)
 					}
 
 					decl String:m_szTitle[128];
-					Format(STRING(m_szTitle), "%t", "Confirm_Sell", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType], m_iCredits);
+					Format(m_szTitle, sizeof(m_szTitle), "%t", "Confirm_Sell", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType], m_iCredits);
 					g_iMenuNum[client] = 2;
 					Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_Item, 0);
 				}
@@ -1953,7 +1953,7 @@ public DisplayPlayerMenu(client)
 			continue;
 		if(i != target && IsClientInGame(i) && !Store_HasClientItem(i, g_iSelectedItem[client]))
 		{
-			IntToString(g_eClients[i][iUserId], STRING(m_szID));
+			IntToString(g_eClients[i][iUserId], m_szID, sizeof(m_szID));
 			AddMenuItem(m_hMenu, m_szID, g_eClients[i][szName]);
 			++m_iCount;
 		}
@@ -1996,7 +1996,7 @@ public MenuHandler_Gift(Handle:menu, MenuAction:action, client, param2)
 		else
 		{
 			decl String:m_szId[11];
-			GetMenuItem(menu, param2, STRING(m_szId));
+			GetMenuItem(menu, param2, m_szId, sizeof(m_szId));
 			
 			new m_iId = StringToInt(m_szId);
 			m_iReceiver = GetClientOfUserId(m_iId);
@@ -2011,7 +2011,7 @@ public MenuHandler_Gift(Handle:menu, MenuAction:action, client, param2)
 			if(g_eCvars[g_cvarConfirmation][aCache])
 			{
 				decl String:m_szTitle[128];
-				Format(STRING(m_szTitle), "%t", "Confirm_Gift", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType], g_eClients[m_iReceiver][szName]);
+				Format(m_szTitle, sizeof(m_szTitle), "%t", "Confirm_Gift", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType], g_eClients[m_iReceiver][szName]);
 				Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_Gift, m_iId);
 				return;
 			}
@@ -2035,8 +2035,8 @@ public MenuHandler_Confirm(Handle:menu, MenuAction:action, client, param2)
 		{
 			decl String:m_szCallback[32];
 			decl String:m_szData[11];
-			GetMenuItem(menu, 0, STRING(m_szCallback));
-			GetMenuItem(menu, 1, STRING(m_szData));
+			GetMenuItem(menu, 0, m_szCallback, sizeof(m_szCallback));
+			GetMenuItem(menu, 1, m_szData, sizeof(m_szData));
 			new m_iPos = FindCharInString(m_szCallback, '.');
 			m_szCallback[m_iPos] = 0;
 			new Handle:m_hPlugin = Handle:StringToInt(m_szCallback);
@@ -2163,7 +2163,7 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 			
 		g_hDatabase = hndl;
 		decl String:m_szDriver[2];
-		SQL_ReadDriver(g_hDatabase, STRING(m_szDriver));
+		SQL_ReadDriver(g_hDatabase, m_szDriver, sizeof(m_szDriver));
 		if(m_szDriver[0] == 'm')
 		{
 			g_bMySQL = true;
@@ -2203,7 +2203,7 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										)");
 			SQL_TQuery(g_hDatabase, SQLCallback_NoError, "ALTER TABLE store_items ADD COLUMN price_of_purchase int(11)");
 			decl String:m_szQuery[512];
-			Format(STRING(m_szQuery), "CREATE TABLE IF NOT EXISTS `%s` (\
+			Format(m_szQuery, sizeof(m_szQuery), "CREATE TABLE IF NOT EXISTS `%s` (\
 										  `id` int(11) NOT NULL AUTO_INCREMENT,\
 										  `parent_id` int(11) NOT NULL DEFAULT '-1',\
 										  `item_price` int(32) NOT NULL,\
@@ -2251,7 +2251,7 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 		
 		// Do some housekeeping
 		decl String:m_szQuery[256];
-		Format(STRING(m_szQuery), "DELETE FROM store_items WHERE `date_of_expiration` <> 0 AND `date_of_expiration` < %d", GetTime());
+		Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE `date_of_expiration` <> 0 AND `date_of_expiration` < %d", GetTime());
 		SQL_TVoid(g_hDatabase, m_szQuery);
 	}
 }
@@ -2271,7 +2271,7 @@ public SQLCallback_LoadClientInventory_Credits(Handle:owner, Handle:hndl, const 
 		new m_iTime = GetTime();
 		g_eClients[client][iUserId] = userid;
 		g_eClients[client][iItems] = -1;
-		GetLegacyAuthString(client, STRING(m_szSteamID), false);
+		GetLegacyAuthString(client, m_szSteamID, sizeof(m_szSteamID), false);
 		strcopy(g_eClients[client][szAuthId], 32, m_szSteamID[8]);
 		GetClientName(client, g_eClients[client][szName], 64);
 		SQL_EscapeString(g_hDatabase, g_eClients[client][szName], g_eClients[client][szNameEscaped], 128);
@@ -2284,7 +2284,7 @@ public SQLCallback_LoadClientInventory_Credits(Handle:owner, Handle:hndl, const 
 			g_eClients[client][iDateOfJoin] = SQL_FetchInt(hndl, 4);
 			g_eClients[client][iDateOfLastJoin] = m_iTime;
 			
-			Format(STRING(m_szQuery), "SELECT * FROM store_items WHERE `player_id`=%d", g_eClients[client][iId]);
+			Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_items WHERE `player_id`=%d", g_eClients[client][iId]);
 			SQL_TQuery(g_hDatabase, SQLCallback_LoadClientInventory_Items, m_szQuery, userid);
 
 			Store_LogMessage(client, g_eClients[client][iCredits], "Amount of credits when the player joined");
@@ -2293,7 +2293,7 @@ public SQLCallback_LoadClientInventory_Credits(Handle:owner, Handle:hndl, const 
 		}
 		else
 		{
-			Format(STRING(m_szQuery), "INSERT INTO store_players (`authid`, `name`, `credits`, `date_of_join`, `date_of_last_join`) VALUES(\"%s\", '%s', %d, %d, %d)",
+			Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_players (`authid`, `name`, `credits`, `date_of_join`, `date_of_last_join`) VALUES(\"%s\", '%s', %d, %d, %d)",
 						g_eClients[client][szAuthId], g_eClients[client][szNameEscaped], g_eCvars[g_cvarStartCredits][aCache], m_iTime, m_iTime);
 			SQL_TQuery(g_hDatabase, SQLCallback_InsertClient, m_szQuery, userid);
 			g_eClients[client][iCredits] = g_eCvars[g_cvarStartCredits][aCache];
@@ -2322,7 +2322,7 @@ public SQLCallback_LoadClientInventory_Items(Handle:owner, Handle:hndl, const St
 			return;
 
 		decl String:m_szQuery[256];
-		Format(STRING(m_szQuery), "SELECT * FROM store_equipment WHERE `player_id`=%d", g_eClients[client][iId]);
+		Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_equipment WHERE `player_id`=%d", g_eClients[client][iId]);
 		SQL_TQuery(g_hDatabase, SQLCallback_LoadClientInventory_Equipment, m_szQuery, userid);
 
 		if(!SQL_GetRowCount(hndl))
@@ -2346,8 +2346,8 @@ public SQLCallback_LoadClientInventory_Items(Handle:owner, Handle:hndl, const St
 			if(m_iExpiration && m_iExpiration<=m_iTime)
 				continue;
 			
-			SQL_FetchString(hndl, 2, STRING(m_szType));
-			SQL_FetchString(hndl, 3, STRING(m_szUniqueId));
+			SQL_FetchString(hndl, 2, m_szType, sizeof(m_szType));
+			SQL_FetchString(hndl, 3, m_szUniqueId, sizeof(m_szUniqueId));
 			while((m_iUniqueId = Store_GetItemId(m_szType, m_szUniqueId, m_iUniqueId))!=-1)
 			{
 				g_eClientItems[client][i][iId] = SQL_FetchInt(hndl, 0);
@@ -2381,8 +2381,8 @@ public SQLCallback_LoadClientInventory_Equipment(Handle:owner, Handle:hndl, cons
 		
 		while(SQL_FetchRow(hndl))
 		{
-			SQL_FetchString(hndl, 1, STRING(m_szType));
-			SQL_FetchString(hndl, 2, STRING(m_szUniqueId));
+			SQL_FetchString(hndl, 1, m_szType, sizeof(m_szType));
+			SQL_FetchString(hndl, 2, m_szUniqueId, sizeof(m_szUniqueId));
 			m_iUniqueId = Store_GetItemId(m_szType, m_szUniqueId);
 			if(m_iUniqueId == -1)
 				continue;
@@ -2464,18 +2464,18 @@ public SQLCallback_ReloadConfig(Handle:owner, Handle:hndl, const String:error[],
 			
 			IntToString(g_eItems[g_iItems][iId], g_eItems[g_iItems][szUniqueId], PLATFORM_MAX_PATH);
 			
-			SQL_FetchString(hndl, 3, STRING(m_szType));
+			SQL_FetchString(hndl, 3, m_szType, sizeof(m_szType));
 			m_iHandler = Store_GetTypeHandler(m_szType);
 			if(m_iHandler == -1)
 				continue;
 			
 			g_eItems[g_iItems][iHandler] = m_iHandler;
 			
-			SQL_FetchString(hndl, 4, STRING(m_szFlag));
+			SQL_FetchString(hndl, 4, m_szFlag, sizeof(m_szFlag));
 			g_eItems[g_iItems][iFlagBits] = ReadFlagString(m_szFlag);
 			
 			SQL_FetchString(hndl, 5, g_eItems[g_iItems][szName], ITEM_NAME_LENGTH);
-			SQL_FetchString(hndl, 6, STRING(m_szInfo));
+			SQL_FetchString(hndl, 6, m_szInfo, sizeof(m_szInfo));
 			
 			m_hKV = CreateKeyValues("Additional Info");
 			
@@ -2518,14 +2518,14 @@ public SQLCallback_ResetPlayer(Handle:owner, Handle:hndl, const String:error[], 
 			SQL_FetchRow(hndl);
 			new id = SQL_FetchInt(hndl, 0);
 			decl String:m_szAuthId[32];
-			SQL_FetchString(hndl, 1, STRING(m_szAuthId));
+			SQL_FetchString(hndl, 1, m_szAuthId, sizeof(m_szAuthId));
 
 			decl String:m_szQuery[512];
-			Format(STRING(m_szQuery), "DELETE FROM store_players WHERE id=%d", id);
+			Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_players WHERE id=%d", id);
 			SQL_TVoid(g_hDatabase, m_szQuery);
-			Format(STRING(m_szQuery), "DELETE FROM store_items WHERE player_id=%d", id);
+			Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE player_id=%d", id);
 			SQL_TVoid(g_hDatabase, m_szQuery);
-			Format(STRING(m_szQuery), "DELETE FROM store_equipment WHERE player_id=%d", id);
+			Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_equipment WHERE player_id=%d", id);
 			SQL_TVoid(g_hDatabase, m_szQuery);
 
 			CPrintToChatAll("%t", "Player Resetted", m_szAuthId);
@@ -2552,11 +2552,11 @@ public Store_LoadClientInventory(client)
 	decl String:m_szQuery[256];
 	decl String:m_szAuthId[32];
 
-	GetLegacyAuthString(client, STRING(m_szAuthId));
+	GetLegacyAuthString(client, m_szAuthId, sizeof(m_szAuthId));
 	if(m_szAuthId[0] == 0)
 		return;
 
-	Format(STRING(m_szQuery), "SELECT * FROM store_players WHERE `authid`=\"%s\"", m_szAuthId[8]);
+	Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_players WHERE `authid`=\"%s\"", m_szAuthId[8]);
 
 	SQL_TQuery(g_hDatabase, SQLCallback_LoadClientInventory_Credits, m_szQuery, g_eClients[client][iUserId]);
 }
@@ -2579,21 +2579,21 @@ public Store_SaveClientInventory(client)
 	
 	for(new i=0;i<g_eClients[client][iItems];++i)
 	{
-		strcopy(STRING(m_szType), g_eTypeHandlers[g_eItems[g_eClientItems[client][i][iUniqueId]][iHandler]][szType]);
-		strcopy(STRING(m_szUniqueId), g_eItems[g_eClientItems[client][i][iUniqueId]][szUniqueId]);
+		strcopy(m_szType, sizeof(m_szType), g_eTypeHandlers[g_eItems[g_eClientItems[client][i][iUniqueId]][iHandler]][szType]);
+		strcopy(m_szUniqueId, sizeof(m_szUniqueId), g_eItems[g_eClientItems[client][i][iUniqueId]][szUniqueId]);
 	
 		if(!g_eClientItems[client][i][bSynced] && !g_eClientItems[client][i][bDeleted])
 		{
 			g_eClientItems[client][i][bSynced] = true;
-			Format(STRING(m_szQuery), "INSERT INTO store_items (`player_id`, `type`, `unique_id`, `date_of_purchase`, `date_of_expiration`, `price_of_purchase`) VALUES(%d, \"%s\", \"%s\", %d, %d, %d)", g_eClients[client][iId], m_szType, m_szUniqueId, g_eClientItems[client][i][iDateOfPurchase], g_eClientItems[client][i][iDateOfExpiration], g_eClientItems[client][i][iPriceOfPurchase]);
+			Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_items (`player_id`, `type`, `unique_id`, `date_of_purchase`, `date_of_expiration`, `price_of_purchase`) VALUES(%d, \"%s\", \"%s\", %d, %d, %d)", g_eClients[client][iId], m_szType, m_szUniqueId, g_eClientItems[client][i][iDateOfPurchase], g_eClientItems[client][i][iDateOfExpiration], g_eClientItems[client][i][iPriceOfPurchase]);
 			SQL_TVoid(g_hDatabase, m_szQuery);
 		} else if(g_eClientItems[client][i][bSynced] && g_eClientItems[client][i][bDeleted])
 		{
 			// Might have been synced already but ID wasn't acquired
 			if(g_eClientItems[client][i][iId]==-1)
-				Format(STRING(m_szQuery), "DELETE FROM store_items WHERE `player_id`=%d AND `type`=\"%s\" AND `unique_id`=\"%s\"", g_eClients[client][iId], m_szType, m_szUniqueId);
+				Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE `player_id`=%d AND `type`=\"%s\" AND `unique_id`=\"%s\"", g_eClients[client][iId], m_szType, m_szUniqueId);
 			else
-				Format(STRING(m_szQuery), "DELETE FROM store_items WHERE `id`=%d", g_eClientItems[client][i][iId]);
+				Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE `id`=%d", g_eClientItems[client][i][iId]);
 			SQL_TVoid(g_hDatabase, m_szQuery);
 		}
 	}
@@ -2612,12 +2612,12 @@ public Store_SaveClientEquipment(client)
 				continue;
 			else if(g_eClients[client][aEquipmentSynced][m_iId] != -2)
 				if(g_eClients[client][aEquipment][m_iId]==-1)
-					Format(STRING(m_szQuery), "DELETE FROM store_equipment WHERE `player_id`=%d AND `type`=\"%s\" AND `slot`=%d", g_eClients[client][iId], g_eTypeHandlers[i][szType], a);
+					Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_equipment WHERE `player_id`=%d AND `type`=\"%s\" AND `slot`=%d", g_eClients[client][iId], g_eTypeHandlers[i][szType], a);
 				else
-					Format(STRING(m_szQuery), "UPDATE store_equipment SET `unique_id`=\"%s\" WHERE `player_id`=%d AND `type`=\"%s\" AND `slot`=%d", g_eItems[g_eClients[client][aEquipment][m_iId]][szUniqueId], g_eClients[client][iId], g_eTypeHandlers[i][szType], a);
+					Format(m_szQuery, sizeof(m_szQuery), "UPDATE store_equipment SET `unique_id`=\"%s\" WHERE `player_id`=%d AND `type`=\"%s\" AND `slot`=%d", g_eItems[g_eClients[client][aEquipment][m_iId]][szUniqueId], g_eClients[client][iId], g_eTypeHandlers[i][szType], a);
 				
 			else
-				Format(STRING(m_szQuery), "INSERT INTO store_equipment (`player_id`, `type`, `unique_id`, `slot`) VALUES(%d, \"%s\", \"%s\", %d)", g_eClients[client][iId], g_eTypeHandlers[i][szType], g_eItems[g_eClients[client][aEquipment][m_iId]][szUniqueId], a);
+				Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_equipment (`player_id`, `type`, `unique_id`, `slot`) VALUES(%d, \"%s\", \"%s\", %d)", g_eClients[client][iId], g_eTypeHandlers[i][szType], g_eItems[g_eClients[client][aEquipment][m_iId]][szUniqueId], a);
 
 			SQL_TVoid(g_hDatabase, m_szQuery);
 			g_eClients[client][aEquipmentSynced][m_iId] = g_eClients[client][aEquipment][m_iId];
@@ -2638,9 +2638,9 @@ public Store_SaveClientData(client)
 	
 	decl String:m_szQuery[256];
 	if(g_bMySQL)
-		Format(STRING(m_szQuery), "UPDATE store_players SET `credits`=GREATEST(`credits`+%d,0), `date_of_last_join`=%d, `name`='%s' WHERE `id`=%d", g_eClients[client][iCredits]-g_eClients[client][iOriginalCredits], g_eClients[client][iDateOfLastJoin], g_eClients[client][szNameEscaped], g_eClients[client][iId]);
+		Format(m_szQuery, sizeof(m_szQuery), "UPDATE store_players SET `credits`=GREATEST(`credits`+%d,0), `date_of_last_join`=%d, `name`='%s' WHERE `id`=%d", g_eClients[client][iCredits]-g_eClients[client][iOriginalCredits], g_eClients[client][iDateOfLastJoin], g_eClients[client][szNameEscaped], g_eClients[client][iId]);
 	else
-		Format(STRING(m_szQuery), "UPDATE store_players SET `credits`=MAX(`credits`+%d,0), `date_of_last_join`=%d, `name`='%s' WHERE `id`=%d", g_eClients[client][iCredits]-g_eClients[client][iOriginalCredits], g_eClients[client][iDateOfLastJoin], g_eClients[client][szNameEscaped], g_eClients[client][iId]);
+		Format(m_szQuery, sizeof(m_szQuery), "UPDATE store_players SET `credits`=MAX(`credits`+%d,0), `date_of_last_join`=%d, `name`='%s' WHERE `id`=%d", g_eClients[client][iCredits]-g_eClients[client][iOriginalCredits], g_eClients[client][iDateOfLastJoin], g_eClients[client][szNameEscaped], g_eClients[client][iId]);
 
 	g_eClients[client][iOriginalCredits] = g_eClients[client][iCredits];
 
@@ -2760,7 +2760,7 @@ public Handle:Store_CreditTimer(client)
 public ReadCoreCFG()
 {
 	new String:m_szFile[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, STRING(m_szFile), "configs/core.cfg");
+	BuildPath(Path_SM, m_szFile, sizeof(m_szFile), "configs/core.cfg");
 
 	new Handle:hParser = SMC_CreateParser();
 	new String:error[128];
@@ -2825,13 +2825,13 @@ public Store_ReloadConfig()
 	if(strcmp(g_eCvars[g_cvarItemSource][sCache], "database")==0)
 	{
 		decl String:m_szQuery[64];
-		Format(STRING(m_szQuery), "SELECT * FROM %s WHERE supported_games LIKE \"%%%s%%\" OR supported_games = \"\"", g_eCvars[g_cvarItemsTable][sCache], g_szGameDir);
+		Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM %s WHERE supported_games LIKE \"%%%s%%\" OR supported_games = \"\"", g_eCvars[g_cvarItemsTable][sCache], g_szGameDir);
 		SQL_TQuery(g_hDatabase, SQLCallback_ReloadConfig, m_szQuery);
 	}
 	else
 	{	
 		new String:m_szFile[PLATFORM_MAX_PATH];
-		BuildPath(Path_SM, STRING(m_szFile), "configs/store/items.txt");
+		BuildPath(Path_SM, m_szFile, sizeof(m_szFile), "configs/store/items.txt");
 		new Handle:m_hKV = CreateKeyValues("Store");
 		FileToKeyValues(m_hKV, m_szFile);
 		if (!KvGotoFirstSubKey(m_hKV))
@@ -2862,8 +2862,8 @@ Store_WalkConfig(&Handle:kv, parent=-1)
 			KvGetSectionName(kv, g_eItems[g_iItems][szUniqueId], 64);
 			ReplaceString(g_eItems[g_iItems][szName], 64, "\\n", "\n");
 			KvGetString(kv, "shortcut", g_eItems[g_iItems][szShortcut], 64);
-			KvGetString(kv, "flag", STRING(m_szFlags));
-			KvGetString(kv, "games", STRING(m_szGame));
+			KvGetString(kv, "flag", m_szFlags, sizeof(m_szFlags));
+			KvGetString(kv, "games", m_szGame, sizeof(m_szGame));
 			if(m_szGame[0] != 0 && StrContains(m_szGame, g_szGameDir)==-1)
 				continue;
 			g_eItems[g_iItems][iFlagBits] = ReadFlagString(m_szFlags);
@@ -2883,7 +2883,7 @@ Store_WalkConfig(&Handle:kv, parent=-1)
 			if(!KvGetNum(kv, "enabled", 1))
 				continue;
 
-			KvGetString(kv, "games", STRING(m_szGame));
+			KvGetString(kv, "games", m_szGame, sizeof(m_szGame));
 			if(m_szGame[0] != 0 && StrContains(m_szGame, g_szGameDir)==-1)
 				continue;
 				
@@ -2894,12 +2894,12 @@ Store_WalkConfig(&Handle:kv, parent=-1)
 			g_eItems[g_iItems][bIgnoreVIP] = (KvGetNum(kv, "ignore_vip", 0)?true:false);
 
 			
-			KvGetString(kv, "type", STRING(m_szType));
+			KvGetString(kv, "type", m_szType, sizeof(m_szType));
 			m_iHandler = Store_GetTypeHandler(m_szType);
 			if(m_iHandler == -1)
 				continue;
 
-			KvGetString(kv, "flag", STRING(m_szFlags));
+			KvGetString(kv, "flag", m_szFlags, sizeof(m_szFlags));
 			g_eItems[g_iItems][iFlagBits] = ReadFlagString(m_szFlags);
 			g_eItems[g_iItems][iHandler] = m_iHandler;
 			
@@ -2939,8 +2939,8 @@ Store_WalkConfig(&Handle:kv, parent=-1)
 				new String:m_szValue[64];
 				do
 				{
-					KvGetSectionName(kv, STRING(m_szAttribute));
-					KvGetString(kv, NULL_STRING, STRING(m_szValue));
+					KvGetSectionName(kv, m_szAttribute, sizeof(m_szAttribute));
+					KvGetString(kv, NULL_STRING, m_szValue, sizeof(m_szValue));
 					SetTrieString(g_eItems[g_iItems][hAttributes], m_szAttribute, m_szValue);
 				} while (KvGotoNextKey(kv, false));
 
@@ -3090,7 +3090,7 @@ Store_LogMessage(client, credits, const String:message[], ...)
 		return;
 
 	decl String:m_szReason[256];
-	VFormat(STRING(m_szReason), message, 4);
+	VFormat(m_szReason, sizeof(m_szReason), message, 4);
 
 	if(g_eCvars[g_cvarLogging][aCache] == 1)
 	{
@@ -3098,7 +3098,7 @@ Store_LogMessage(client, credits, const String:message[], ...)
 	} else if(g_eCvars[g_cvarLogging][aCache] == 2)
 	{
 		decl String:m_szQuery[256];
-		Format(STRING(m_szQuery), "INSERT INTO store_logs (player_id, credits, reason, date) VALUES(%d, %d, \"%s\", %d)", g_eClients[client][iId], credits, m_szReason, GetTime());
+		Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_logs (player_id, credits, reason, date) VALUES(%d, %d, \"%s\", %d)", g_eClients[client][iId], credits, m_szReason, GetTime());
 		SQL_TVoid(g_hDatabase, m_szQuery);
 	}
 }
@@ -3141,7 +3141,7 @@ public Store_OnPaymentReceived(FriendID, quanity, Handle:data)
 			new m_unAccountID = (FriendID-m_unMod)/2;
 
 			decl String:m_szQuery[256];
-			Format(STRING(m_szQuery), "SELECT * FROM store_players WHERE `authid`=\"%d:%d\"", m_unMod, m_unAccountID);
+			Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_players WHERE `authid`=\"%d:%d\"", m_unMod, m_unAccountID);
 			SQL_TQuery(g_hDatabase, SQLCallback_LoadClientInventory_Credits, m_szQuery, GetClientUserId(i));
 			break;
 		}

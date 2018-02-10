@@ -33,14 +33,14 @@ public Jihad_OnConfigsExecuted()
 	if(g_eCvars[g_cvarJihadExplosionSound][sCache][0]!=0 && FileExists(g_eCvars[g_cvarJihadExplosionSound][sCache], true))
 	{
 		PrecacheSound(g_eCvars[g_cvarJihadExplosionSound][sCache]);
-		Format(STRING(m_szSound), "sound/%s", g_eCvars[g_cvarJihadExplosionSound][sCache]);
+		Format(m_szSound, sizeof(m_szSound), "sound/%s", g_eCvars[g_cvarJihadExplosionSound][sCache]);
 		AddFileToDownloadsTable(m_szSound);
 	}
 	
 	if(g_eCvars[g_cvarJihadBeforeSound][sCache][0]!=0 && FileExists(g_eCvars[g_cvarJihadBeforeSound][sCache], true))
 	{
 		PrecacheSound(g_eCvars[g_cvarJihadBeforeSound][sCache]);
-		Format(STRING(m_szSound), "sound/%s", g_eCvars[g_cvarJihadBeforeSound][sCache]);
+		Format(m_szSound, sizeof(m_szSound), "sound/%s", g_eCvars[g_cvarJihadBeforeSound][sCache]);
 		AddFileToDownloadsTable(m_szSound);
 	}
 }

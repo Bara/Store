@@ -21,17 +21,17 @@ public Action:Attributes_PlayerSpawn(Handle:event, const String:name[], bool:don
 	{
 		Store_GetItem(item_idx, item);
 
-		if(GetTrieString(item[hAttributes], "health", STRING(m_szValue)))
+		if(GetTrieString(item[hAttributes], "health", m_szValue, sizeof(m_szValue)))
 		{
 			SetEntityHealth(client, GetClientHealth(client)+StringToInt(m_szValue));
 		}
 
-		if(GetTrieString(item[hAttributes], "gravity", STRING(m_szValue)))
+		if(GetTrieString(item[hAttributes], "gravity", m_szValue, sizeof(m_szValue)))
 		{
 			SetEntityGravity(client, StringToFloat(m_szValue));
 		}
 
-		if(GetTrieString(item[hAttributes], "armor", STRING(m_szValue)))
+		if(GetTrieString(item[hAttributes], "armor", m_szValue, sizeof(m_szValue)))
 		{
 			SetEntProp(client, Prop_Send, "m_ArmorValue", GetEntProp(client, Prop_Send, "m_ArmorValue")+StringToInt(m_szValue));
 		}

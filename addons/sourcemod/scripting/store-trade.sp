@@ -134,7 +134,7 @@ public Action:Command_Offer(client, args)
 	}
 
 	decl String:m_szCredits[11];
-	GetCmdArg(1, STRING(m_szCredits));
+	GetCmdArg(1, m_szCredits, sizeof(m_szCredits));
 
 	new m_iCredits = StringToInt(m_szCredits);
 	if(m_iCredits < 0 || Store_GetClientCredits(client) < m_iCredits)
@@ -179,8 +179,8 @@ public Action:Command_Trade(client, args)
 		if(!Store_IsClientLoaded(i))
 			continue;
 
-		IntToString(GetClientUserId(i), STRING(m_szUserId));
-		GetClientName(i, STRING(m_szClientName));
+		IntToString(GetClientUserId(i), m_szUserId, sizeof(m_szUserId));
+		GetClientName(i, m_szClientName, sizeof(m_szClientName));
 		AddMenuItem(m_hMenu, m_szUserId, m_szClientName);
 	}
 	DisplayMenu(m_hMenu, client, 0);
@@ -213,7 +213,7 @@ public MenuHandler_SelectPlayer(Handle:menu, MenuAction:action, client, param2)
 	else if (action == MenuAction_Select)
 	{
 		decl String:m_szUserId[11];
-		GetMenuItem(menu, param2, STRING(m_szUserId));
+		GetMenuItem(menu, param2, m_szUserId, sizeof(m_szUserId));
 		new target = GetClientOfUserId(StringToInt(m_szUserId));
 		if(!target || !IsClientInGame(target))
 		{
@@ -313,7 +313,7 @@ public DisplayTradeMenu(client)
 		Store_GetItem(g_iOffers[client][i], m_eItem);
 		Store_GetHandler(m_eItem[iHandler], m_eHandler);
 
-		IntToString(g_iOffers[client][i], STRING(m_szItemID));
+		IntToString(g_iOffers[client][i], m_szItemID, sizeof(m_szItemID));
 		AddMenuItemEx(m_hMenu, ITEMDRAW_DEFAULT, m_szItemID, "%s %s", m_eItem[szName], m_eHandler[szType]);
 	}
 
@@ -431,7 +431,7 @@ public MenuHandler_Trade(Handle:menu, MenuAction:action, client, param2)
 		else
 		{
 			new String:m_szItemId[11];
-			GetMenuItem(menu, param2, STRING(m_szItemId));
+			GetMenuItem(menu, param2, m_szItemId, sizeof(m_szItemId));
 			new m_iItemID = StringToInt(m_szItemId);
 
 			for(new i=0;i<STORE_TRADE_MAX_OFFERS;++i)

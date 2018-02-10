@@ -11,8 +11,6 @@
 
 #define MAX_CVARS 128
 
-#define STRING(%1) %1, sizeof(%1)
-
 enum CVAR_TYPE
 {
 	TYPE_INT = 0,
@@ -143,7 +141,7 @@ public SQLCallback_Void_PrintQuery(Handle:owner, Handle:hndl, const String:error
 	if(hndl==INVALID_HANDLE)
 	{
 		new String:query[2048];
-		ReadPackString(data, STRING(query));
+		ReadPackString(data, query, sizeof(query));
 		LogError("SQL error happened.\nQuery: %s\nError: %s", query, error);
 	}
 	CloseHandle(data);
@@ -170,7 +168,7 @@ stock GetClientBySteamID(String:steamid[])
 			continue;
 		if(!IsClientAuthorized(i))
 			continue;
-		GetClientAuthId(i, AuthId_Steam2, STRING(authid));
+		GetClientAuthId(i, AuthId_Steam2, authid, sizeof(authid));
 		if(strcmp(authid[8], steamid[8])==0 || strcmp(authid, steamid)==0)
 			return i;
 	}
@@ -405,7 +403,7 @@ stock Downloader_ParseMDL(const String:model[], String:internal[], maxlen1, Stri
 		FileSeek(m_hFile, m_iDirOffset, SEEK_SET);
 		ReadFileCell(m_hFile, m_iDirOffset, 4);
 		FileSeek(m_hFile, m_iDirOffset, SEEK_SET);
-		ReadFileString(m_hFile, STRING(m_szPath));
+		ReadFileString(m_hFile, m_szPath, sizeof(m_szPath));
 	}
 
 	new String:m_szMaterial[PLATFORM_MAX_PATH];
@@ -414,7 +412,7 @@ stock Downloader_ParseMDL(const String:model[], String:internal[], maxlen1, Stri
 		FileSeek(m_hFile, m_iOffset+m_iIdx*64, SEEK_SET);
 		ReadFileCell(m_hFile, m_iNameOffset, 4);
 		FileSeek(m_hFile, m_iNameOffset-4, SEEK_CUR);
-		ReadFileString(m_hFile, STRING(m_szMaterial));
+		ReadFileString(m_hFile, m_szMaterial, sizeof(m_szMaterial));
 
 		Format(files[m_iIdx], maxlen2, "materials\\%s%s.vmt", m_szPath, m_szMaterial);
 	}
@@ -427,8 +425,8 @@ stock Downloader_GetModelFiles(const String:model[], const String:internal[], St
 {
 	decl String:m_szRawPath1[PLATFORM_MAX_PATH];
 	decl String:m_szRawPath2[PLATFORM_MAX_PATH];
-	strcopy(STRING(m_szRawPath1), model);
-	Format(STRING(m_szRawPath2), "models/%s", internal);
+	strcopy(m_szRawPath1, sizeof(m_szRawPath1), model);
+	Format(m_szRawPath2, sizeof(m_szRawPath2), "models/%s", internal);
 
 	new m_iDot = FindCharInString(m_szRawPath1, '.', true);
 	if(m_iDot == -1)
@@ -548,7 +546,7 @@ stock Downloader_AddFileToDownloadsTable(const String:filename[])
 		decl String:m_szFiles[sizeof(g_szModelExts)][PLATFORM_MAX_PATH];
 		new String:m_szInternal[64];
 
-		m_iNum = Downloader_ParseMDL(filename, STRING(m_szInternal), m_szMaterials, sizeof(m_szMaterials), sizeof(m_szMaterials[]));
+		m_iNum = Downloader_ParseMDL(filename, m_szInternal, sizeof(m_szInternal), m_szMaterials, sizeof(m_szMaterials), sizeof(m_szMaterials[]));
 		for(new i=0;i<m_iNum;++i)
 		{
 			if(FileExists2(m_szMaterials[i]))
@@ -608,7 +606,7 @@ public CacheDirectory(const String:directory[])
 	new Handle:m_hDir = OpenDirectory(directory);
 	decl String:m_szPath[PLATFORM_MAX_PATH];
 	decl FileType:m_eType;
-	Format(STRING(m_szPath), "%s/", directory);
+	Format(m_szPath, sizeof(m_szPath), "%s/", directory);
 	new m_unLen = strlen(m_szPath);
 	new m_unOffset = FindCharInString(m_szPath, '/')+1;
 	m_unOffset += FindCharInString(m_szPath[m_unOffset], '/')+1;
@@ -634,9 +632,9 @@ stock Handle:OpenFile2(const String:file[], const String:mode[])
 		CacheCustomDirectory();
 
 	decl String:m_szPath[PLATFORM_MAX_PATH];
-	if(!GetTrieString(g_hCustomFiles, file, STRING(m_szPath)))
+	if(!GetTrieString(g_hCustomFiles, file, m_szPath, sizeof(m_szPath)))
 	{
-		strcopy(STRING(m_szPath), file);
+		strcopy(m_szPath, sizeof(m_szPath), file);
 	}
 
 	return OpenFile(m_szPath, mode);
@@ -648,7 +646,7 @@ stock bool:FileExists2(const String:file[])
 		CacheCustomDirectory();
 
 	decl String:m_szPath[PLATFORM_MAX_PATH];
-	if(!GetTrieString(g_hCustomFiles, file, STRING(m_szPath)))
+	if(!GetTrieString(g_hCustomFiles, file, m_szPath, sizeof(m_szPath)))
 		return FileExists(file);
 
 	return FileExists(m_szPath);
@@ -661,7 +659,7 @@ stock bool:IsPluginLoaded(String:name[])
 	while (MorePlugins(pluginIterator))
 	{
 		new Handle:currentPlugin = ReadPlugin(pluginIterator);
-		GetPluginFilename(currentPlugin, STRING(m_szName));
+		GetPluginFilename(currentPlugin, m_szName, sizeof(m_szName));
 		m_szName[strlen(m_szName)-4]=0;
 		if(strcmp(name, m_szName)==0)
 			return true;
@@ -719,7 +717,7 @@ stock StringTableContains(const table, const String:model[])
 stock GetLegacyAuthString(client, String:out[], maxlen, bool:validate=true)
 {
 	new String:m_szSteamID[32];
-	new bool:success = GetClientAuthId(client, AuthId_Steam2, STRING(m_szSteamID), validate);
+	new bool:success = GetClientAuthId(client, AuthId_Steam2, m_szSteamID, sizeof(m_szSteamID), validate);
 
 	if(m_szSteamID[0]=='[')
 	{
@@ -738,7 +736,7 @@ stock GetLegacyAuthString(client, String:out[], maxlen, bool:validate=true)
 stock GetFriendID(client, bool:validate=true)
 {
 	new String:auth[32];
-	GetLegacyAuthString(client, STRING(auth), validate);
+	GetLegacyAuthString(client, auth, sizeof(auth), validate);
 
 	return ToAccountID(auth);
 }

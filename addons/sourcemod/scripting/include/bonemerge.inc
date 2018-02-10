@@ -125,7 +125,7 @@ stock CAddLink(ent, client) {
         SetEntProp(link, Prop_Send, "m_fEffects",               EF_BONEMERGE|EF_NOSHADOW|EF_PARENT_ANIMATES);
         
         decl String:m_szModelName[PLATFORM_MAX_PATH];
-        GetEntPropString(client, Prop_Data, "m_ModelName", STRING(m_szModelName));
+        GetEntPropString(client, Prop_Data, "m_ModelName", m_szModelName, sizeof(m_szModelName));
         SetEntityModel(link, m_szModelName);
         
         new m_iTeam = GetClientTeam(client);

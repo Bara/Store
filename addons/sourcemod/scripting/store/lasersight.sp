@@ -75,7 +75,7 @@ public LaserSight_OnPlayerRunCmd(client)
 		return;
 
 	decl String:m_szWeapon[64];
-	GetClientWeapon(client, STRING(m_szWeapon));
+	GetClientWeapon(client, m_szWeapon, sizeof(m_szWeapon));
 
 	new m_iTmp;
 	if(!GetTrieValue(g_hSnipers, m_szWeapon[7], m_iTmp))

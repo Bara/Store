@@ -24,7 +24,7 @@ public Sprays_OnMapStart()
 	{
 		if(FileExists(g_szSprays[i], true))
 		{
-			strcopy(STRING(m_szDecal), g_szSprays[i][10]);
+			strcopy(m_szDecal, sizeof(m_szDecal), g_szSprays[i][10]);
 			PrintToServer("%s (%d)", m_szDecal, strlen(m_szDecal)-4);
 			m_szDecal[strlen(m_szDecal)-4]=0;
 

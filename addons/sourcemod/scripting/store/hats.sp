@@ -270,7 +270,7 @@ public RemoveHat(client, slot)
 	{
 		SDKUnhook(g_iClientHats[client][slot], SDKHook_SetTransmit, Hook_SetTransmit);
 		new String:m_szClassname[64];
-		GetEdictClassname(g_iClientHats[client][slot], STRING(m_szClassname));
+		GetEdictClassname(g_iClientHats[client][slot], m_szClassname, sizeof(m_szClassname));
 		if(strcmp("prop_dynamic", m_szClassname)==0)
 			AcceptEntityInput(g_iClientHats[client][slot], "Kill");
 	}

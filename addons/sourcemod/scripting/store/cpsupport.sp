@@ -82,21 +82,21 @@ public Action CP_OnChatMessage(int& client, ArrayList recipients, char[] flagstr
 	if(m_iEquippedNameTag >= 0)
 	{
 		new m_iNameTag = Store_GetDataIndex(m_iEquippedNameTag);
-		strcopy(STRING(m_szNameTag), g_szNameTags[m_iNameTag]);
+		strcopy(m_szNameTag, sizeof(m_szNameTag), g_szNameTags[m_iNameTag]);
 	}
 	if(m_iEquippedNameColor >= 0)
 	{
 		new m_iNameColor = Store_GetDataIndex(m_iEquippedNameColor);
-		strcopy(STRING(m_szNameColor), g_szNameColors[m_iNameColor]);
+		strcopy(m_szNameColor, sizeof(m_szNameColor), g_szNameColors[m_iNameColor]);
 	}
-	Format(STRING(m_szName), "%s%s%s", m_szNameTag, m_szNameColor, name);
+	Format(m_szName, sizeof(m_szName), "%s%s%s", m_szNameTag, m_szNameColor, name);
 	CFormatColor(m_szName, sizeof(m_szName), client);
 	strcopy(name, MAXLENGTH_NAME, m_szName);
 
 	if(m_iEquippedMsgColor >= 0)
 	{
 		new String:m_szMessage[MAXLENGTH_BUFFER];
-		strcopy(STRING(m_szMessage), message);
+		strcopy(m_szMessage, sizeof(m_szMessage), message);
 		Format(message, MAXLENGTH_BUFFER, "%s%s", g_szMessageColors[Store_GetDataIndex(m_iEquippedMsgColor)], m_szMessage);
 		CFormatColor(message, MAXLENGTH_BUFFER, client);
 	}

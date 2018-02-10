@@ -20,7 +20,7 @@ public Sounds_OnMapStart()
 	decl String:tmp[PLATFORM_MAX_PATH];
 	for(new i=0;i<g_iSounds;++i)
 	{
-		strcopy(STRING(tmp), g_eSounds[i][szSound]);
+		strcopy(tmp, sizeof(tmp), g_eSounds[i][szSound]);
 		PrecacheSound(tmp[6], true);
 		Downloader_AddFileToDownloadsTable(g_eSounds[i][szSound]);
 	}
@@ -70,7 +70,7 @@ public Action:Sounds_PlayerSay(Handle:event, const String:name[], bool:dontBroad
 		return Plugin_Continue;
 	
 	new String:msg[256];
-	GetEventString(event, "text", STRING(msg));
+	GetEventString(event, "text", msg, sizeof(msg));
 
 	for(new i=0;i<g_iSounds;++i)
 	{
@@ -81,7 +81,7 @@ public Action:Sounds_PlayerSay(Handle:event, const String:name[], bool:dontBroad
 			{
 				Store_SetClientCredits(client, c-g_eSounds[i][unPrice]);
 				decl String:tmp[PLATFORM_MAX_PATH];
-				strcopy(STRING(tmp), g_eSounds[i][szSound]);
+				strcopy(tmp, sizeof(tmp), g_eSounds[i][szSound]);
 				LoopIngamePlayers(a)
 				{
 					ClientCommand(a, "play %s", tmp[6]);

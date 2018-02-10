@@ -196,7 +196,7 @@ public RemoveTrail(client, slot)
 		g_iTrailOwners[g_iClientTrails[client][slot]]=-1;
 
 		new String:m_szClassname[64];
-		GetEdictClassname(g_iClientTrails[client][slot], STRING(m_szClassname));
+		GetEdictClassname(g_iClientTrails[client][slot], m_szClassname, sizeof(m_szClassname));
 		if(strcmp("env_spritetrail", m_szClassname)==0)
 		{
 			SDKUnhook(g_iClientTrails[client][slot], SDKHook_SetTransmit, Hook_TrailSetTransmit);
