@@ -68,10 +68,10 @@ enum Menu_Handler
 //		GLOBAL VARIABLES		//
 //////////////////////////////////
 
-new Handle:g_hDatabase = INVALID_HANDLE;
-new Handle:g_hAdminMenu = INVALID_HANDLE;
-new Handle:g_hLogFile = INVALID_HANDLE;
-new Handle:g_hCustomCredits = INVALID_HANDLE;
+Database g_dDatabase = null;
+new Handle:g_hAdminMenu = null;
+new Handle:g_hLogFile = null;
+new Handle:g_hCustomCredits = null;
 
 new g_cvarDatabaseEntry = -1;
 new g_cvarDatabaseRetries = -1;
@@ -195,7 +195,7 @@ public OnPluginStart()
 		g_eClients[i][iCredits] = -1;
 		g_eClients[i][iOriginalCredits] = 0;
 		g_eClients[i][iItems] = -1;
-		g_eClients[i][hCreditTimer] = INVALID_HANDLE;
+		g_eClients[i][hCreditTimer] = null;
 	}
 
 	// Register ConVars
@@ -282,7 +282,7 @@ public OnPluginStart()
 	Glow_OnPluginStart();
 
 	new Handle:topmenu;
-	if (LibraryExists("adminmenu") && ((topmenu = GetAdminTopMenu()) != INVALID_HANDLE))
+	if (LibraryExists("adminmenu") && ((topmenu = GetAdminTopMenu()) != null))
 		OnAdminMenuReady(topmenu);
 
 	// Initialize handles
@@ -417,9 +417,9 @@ public AdminMenu_ResetDb(Handle:topmenu, TopMenuAction:action, TopMenuObject:obj
 
 public FakeMenuHandler_ResetDatabase(Handle:menu, MenuAction:action, client, param2)
 {
-	SQL_TVoid(view_as<Database>(g_hDatabase), "DROP TABLE store_players");
-	SQL_TVoid(view_as<Database>(g_hDatabase), "DROP TABLE store_items");
-	SQL_TVoid(view_as<Database>(g_hDatabase), "DROP TABLE store_equipment");
+	SQL_TVoid(g_dDatabase, "DROP TABLE store_players");
+	SQL_TVoid(g_dDatabase, "DROP TABLE store_items");
+	SQL_TVoid(g_dDatabase, "DROP TABLE store_equipment");
 	ServerCommand("_restart");
 }
 
@@ -441,8 +441,8 @@ public AdminMenu_ResetPlayer(Handle:topmenu, TopMenuAction:action, TopMenuObject
 		SetMenuExitBackButton(m_hMenu, true);
 		LoopAuthorizedPlayers(i)
 		{
-			decl String:m_szName[64];
-			decl String:m_szAuthId[32];
+			char m_szName[64];
+			char m_szAuthId[32];
 			GetClientName(i, m_szName, sizeof(m_szName));
 			GetLegacyAuthString(i, m_szAuthId, sizeof(m_szAuthId));
 			AddMenuItem(m_hMenu, m_szAuthId, m_szName);
@@ -457,15 +457,15 @@ public MenuHandler_ResetPlayer(Handle:menu, MenuAction:action, client, param2)
 		CloseHandle(menu);
 	else if (action == MenuAction_Select)
 	{
-		if(menu == INVALID_HANDLE)
+		if(menu == null)
 			FakeClientCommandEx(client, "sm_resetplayer \"%s\"", g_szClientData[client]);
 		else
 		{
 			decl style;
-			decl String:m_szName[64];
+			char m_szName[64];
 			GetMenuItem(menu, param2, g_szClientData[client], sizeof(g_szClientData[]), style, m_szName, sizeof(m_szName));
 
-			decl String:m_szTitle[256];
+			char m_szTitle[256];
 			Format(m_szTitle, sizeof(m_szTitle), "Do you want to reset %s?", m_szName);
 			Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_ResetPlayer, 0);
 		}
@@ -492,8 +492,8 @@ public AdminMenu_GiveCredits(Handle:topmenu, TopMenuAction:action, TopMenuObject
 		SetMenuExitBackButton(m_hMenu, true);
 		LoopAuthorizedPlayers(i)
 		{
-			decl String:m_szName[64];
-			decl String:m_szAuthId[32];
+			char m_szName[64];
+			char m_szAuthId[32];
 			GetClientName(i, m_szName, sizeof(m_szName));
 			GetLegacyAuthString(i, m_szAuthId, sizeof(m_szAuthId));
 			AddMenuItem(m_hMenu, m_szAuthId, m_szName);
@@ -539,10 +539,10 @@ public MenuHandler_GiveCredits2(Handle:menu, MenuAction:action, client, param2)
 		CloseHandle(menu);
 	else if (action == MenuAction_Select)
 	{
-		decl String:m_szData[11];
+		char m_szData[11];
 		GetMenuItem(menu, param2, m_szData, sizeof(m_szData));
 		FakeClientCommand(client, "sm_givecredits \"%s\" %s", g_szClientData[client], m_szData);
-		MenuHandler_GiveCredits(INVALID_HANDLE, MenuAction_Select, client, -1);
+		MenuHandler_GiveCredits(null, MenuAction_Select, client, -1);
 	}
 	else if (action == MenuAction_Cancel && param2 == MenuCancel_ExitBack)
 		AdminMenu_GiveCredits(g_hAdminMenu, TopMenuAction_SelectOption, g_eStoreAdmin, client, "", 0);
@@ -566,8 +566,8 @@ public AdminMenu_ViewInventory(Handle:topmenu, TopMenuAction:action, TopMenuObje
 		SetMenuExitBackButton(m_hMenu, true);
 		LoopAuthorizedPlayers(i)
 		{
-			decl String:m_szName[64];
-			decl String:m_szAuthId[32];
+			char m_szName[64];
+			char m_szAuthId[32];
 			GetClientName(i, m_szName, sizeof(m_szName));
 			GetLegacyAuthString(i, m_szAuthId, sizeof(m_szAuthId));
 			AddMenuItem(m_hMenu, m_szAuthId, m_szName);
@@ -620,14 +620,14 @@ public OnConfigsExecuted()
 	Jihad_OnConfigsExecuted();
 
 	// Connect to the database
-	if(g_hDatabase == INVALID_HANDLE)
-		SQL_TConnect(SQLCallback_Connect, g_eCvars[g_cvarDatabaseEntry][sCache]);
+	if(g_dDatabase == null)
+		Database.Connect(SQLCallback_Connect, g_eCvars[g_cvarDatabaseEntry][sCache]);
 	if(g_eCvars[g_cvarDatabaseRetries][aCache] > 0)
 		CreateTimer(Float:g_eCvars[g_cvarDatabaseTimeout][aCache], Timer_DatabaseTimeout);
 
 	if(g_eCvars[g_cvarLogging][aCache] == 1)
 	{
-		if(g_hLogFile == INVALID_HANDLE)
+		if(g_hLogFile == null)
 		{
 			new String:m_szPath[PLATFORM_MAX_PATH];
 			BuildPath(Path_SM, m_szPath, sizeof(m_szPath), "logs/store.log.txt");
@@ -660,7 +660,7 @@ public Native_RegisterHandler(Handle:plugin, numParams)
 	if(g_iTypeHandlers == STORE_MAX_HANDLERS)
 		return -1;
 		
-	decl String:m_szType[32];
+	char m_szType[32];
 	GetNativeString(1, m_szType, sizeof(m_szType));
 	new m_iHandler = Store_GetTypeHandler(m_szType);	
 	new m_iId = g_iTypeHandlers;
@@ -689,7 +689,7 @@ public Native_RegisterMenuHandler(Handle:plugin, numParams)
 	if(g_iMenuHandlers == STORE_MAX_HANDLERS)
 		return -1;
 		
-	decl String:m_szIdentifier[64];
+	char m_szIdentifier[64];
 	GetNativeString(1, m_szIdentifier, sizeof(m_szIdentifier));
 	new m_iHandler = Store_GetMenuHandler(m_szIdentifier);	
 	new m_iId = g_iMenuHandlers;
@@ -719,7 +719,7 @@ public Native_GetDataIndex(Handle:plugin, numParams)
 
 public Native_GetEquippedItem(Handle:plugin, numParams)
 {
-	decl String:m_szType[16];
+	char m_szType[16];
 	GetNativeString(2, m_szType, sizeof(m_szType));
 	
 	new m_iHandler = Store_GetTypeHandler(m_szType);
@@ -803,7 +803,7 @@ public Native_IsItemInBoughtPackage(Handle:plugin, numParams)
 public Native_DisplayConfirmMenu(Handle:plugin, numParams)
 {
 	new client = GetNativeCell(1);
-	decl String:title[255];
+	char title[255];
 	GetNativeString(2, title, sizeof(title));
 	new callback = GetNativeCell(3);
 	new data = GetNativeCell(4);
@@ -968,7 +968,7 @@ public Native_IterateEquippedItems(Handle:plugin, numParams)
 
 	for(new i=start+1;i<STORE_MAX_HANDLERS*STORE_MAX_SLOTS;++i)
 	{
-		if(g_eClients[client][aEquipment][i] >= 0 && (attributes==false || (attributes && g_eItems[g_eClients[client][aEquipment][i]][hAttributes]!=INVALID_HANDLE)))
+		if(g_eClients[client][aEquipment][i] >= 0 && (attributes==false || (attributes && g_eItems[g_eClients[client][aEquipment][i]][hAttributes]!=null)))
 		{
 			SetNativeCellRef(2, i);
 			return g_eClients[client][aEquipment][i];
@@ -1039,8 +1039,8 @@ public OnClientDisconnect(client)
 public OnClientSettingsChanged(client)
 {
 	GetClientName(client, g_eClients[client][szName], 64);
-	if(g_hDatabase)
-		SQL_EscapeString(g_hDatabase, g_eClients[client][szName], g_eClients[client][szNameEscaped], 128);
+	if(g_dDatabase)
+		SQL_EscapeString(g_dDatabase, g_eClients[client][szName], g_eClients[client][szNameEscaped], 128);
 }
 
 public Action:OnPlayerRunCmd(client, &buttons, &impulse, Float:vel[3], Float:angles[3], &weapon, &subtype, &cmdnum, &tickcount, &seed, mouse[2])
@@ -1110,7 +1110,7 @@ public Action:Command_Say(client, const String:command[], argc)
 {
 	if(argc > 0)
 	{
-		decl String:m_szArg[65];
+		char m_szArg[65];
 		GetCmdArg(1, m_szArg, sizeof(m_szArg));
 		if(m_szArg[0] == PublicChatTrigger || m_szArg[0] == SilentChatTrigger)
 		{
@@ -1184,7 +1184,7 @@ public Action:Command_Gift(client, params)
 		return Plugin_Handled;
 	}
 	
-	decl String:m_szTmp[64];
+	char m_szTmp[64];
 	GetCmdArg(2, m_szTmp, sizeof(m_szTmp));
 	
 	new m_iCredits = StringToInt(m_szTmp);
@@ -1233,7 +1233,7 @@ public Action:Command_GiveCredits(client, params)
 		return Plugin_Handled;
 	}
 	
-	decl String:m_szTmp[64];
+	char m_szTmp[64];
 	GetCmdArg(2, m_szTmp, sizeof(m_szTmp));
 	
 	new m_iCredits = StringToInt(m_szTmp);
@@ -1249,16 +1249,16 @@ public Action:Command_GiveCredits(client, params)
 		// SteamID is not ingame
 		if(m_iReceiver == 0)
 		{
-			decl String:m_szQuery[512];
+			char m_szQuery[512];
 			if(g_bMySQL)
 				Format(m_szQuery, sizeof(m_szQuery), "INSERT IGNORE INTO store_players (authid, credits) VALUES (\"%s\", %d) ON DUPLICATE KEY UPDATE credits=credits+%d", m_szTmp[8], m_iCredits, m_iCredits);
 			else
 			{
 				Format(m_szQuery, sizeof(m_szQuery), "INSERT OR IGNORE INTO store_players (authid) VALUES (\"%s\")", m_szTmp[8]);
-				SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+				SQL_TVoid(g_dDatabase, m_szQuery);
 				Format(m_szQuery, sizeof(m_szQuery), "UPDATE store_players SET credits=credits+%d WHERE authid=\"%s\"", m_iCredits, m_szTmp[8]);
 			}
-			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+			SQL_TVoid(g_dDatabase, m_szQuery);
 			CPrintToChatAll("%t", "Credits Given", m_szTmp[8], m_iCredits);
 			m_iReceiver = -1;
 		}
@@ -1327,7 +1327,7 @@ public Action:Command_ResetPlayer(client, params)
 		return Plugin_Handled;
 	}
 
-	decl String:m_szTmp[64];
+	char m_szTmp[64];
 	decl bool:m_bTmp;
 	decl m_iTargets[1];
 	GetCmdArg(1, m_szTmp, sizeof(m_szTmp));
@@ -1339,9 +1339,9 @@ public Action:Command_ResetPlayer(client, params)
 		// SteamID is not ingame
 		if(m_iReceiver == 0)
 		{
-			decl String:m_szQuery[512];
+			char m_szQuery[512];
 			Format(m_szQuery, sizeof(m_szQuery), "SELECT id, authid FROM store_players WHERE authid=\"%s\"", m_szTmp[9]);
-			SQL_TQuery(g_hDatabase, SQLCallback_ResetPlayer, m_szQuery, g_eClients[client][iUserId]);
+			g_dDatabase.Query(SQLCallback_ResetPlayer, m_szQuery, g_eClients[client][iUserId]);
 		}
 	}
 	else
@@ -1455,7 +1455,7 @@ DisplayStoreMenu(client, parent=-1, last=-1)
 	else
 		SetMenuTitle(m_hMenu, "%N\n%t\n%t", target, "Title Store", "Title Credits", g_eClients[target][iCredits]);
 	
-	decl String:m_szId[11];
+	char m_szId[11];
 	new m_iFlags = GetUserFlagBits(target);
 	new m_iPosition = 0;
 	
@@ -1479,7 +1479,7 @@ DisplayStoreMenu(client, parent=-1, last=-1)
 
 				for(new i=0;i<g_iMenuHandlers;++i)
 				{
-					if(g_eMenuHandlers[i][hPlugin] == INVALID_HANDLE)
+					if(g_eMenuHandlers[i][hPlugin] == null)
 						continue;
 					Call_StartFunction(g_eMenuHandlers[i][hPlugin], g_eMenuHandlers[i][fnMenu]);
 					Call_PushCellRef(m_hMenu);
@@ -1559,7 +1559,7 @@ public MenuHandler_Store(Handle:menu, MenuAction:action, client, param2)
 	{
 		new target = g_iMenuClient[client];
 		// Confirmation was given
-		if(menu == INVALID_HANDLE)
+		if(menu == null)
 		{
 			if(param2 == 0)
 			{
@@ -1596,7 +1596,7 @@ public MenuHandler_Store(Handle:menu, MenuAction:action, client, param2)
 			{
 				if(g_eCvars[g_cvarConfirmation][aCache])
 				{
-					decl String:m_szTitle[128];
+					char m_szTitle[128];
 					Format(m_szTitle, sizeof(m_szTitle), "%t", "Confirm_Sell", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType], RoundToFloor(g_eItems[g_iSelectedItem[client]][iPrice]*Float:g_eCvars[g_cvarSellRatio][aCache]));
 					Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_Store, 1);
 					return;
@@ -1645,7 +1645,7 @@ public MenuHandler_Store(Handle:menu, MenuAction:action, client, param2)
 					else
 						if(g_eCvars[g_cvarConfirmation][aCache])
 						{
-							decl String:m_szTitle[128];
+							char m_szTitle[128];
 							Format(m_szTitle, sizeof(m_szTitle), "%t", "Confirm_Buy", g_eItems[m_iId][szName], g_eTypeHandlers[g_eItems[m_iId][iHandler]][szType]);
 							Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_Store, 0);
 							return;
@@ -1746,7 +1746,7 @@ public DisplayItemMenu(client, itemid)
 
 	for(new i=0;i<g_iMenuHandlers;++i)
 	{
-		if(g_eMenuHandlers[i][hPlugin] == INVALID_HANDLE)
+		if(g_eMenuHandlers[i][hPlugin] == null)
 			continue;
 		Call_StartFunction(g_eMenuHandlers[i][hPlugin], g_eMenuHandlers[i][fnMenu]);
 		Call_PushCellRef(m_hMenu);
@@ -1788,7 +1788,7 @@ public MenuHandler_Plan(Handle:menu, MenuAction:action, client, param2)
 
 		if(g_eCvars[g_cvarConfirmation][aCache])
 		{
-			decl String:m_szTitle[128];
+			char m_szTitle[128];
 			Format(m_szTitle, sizeof(m_szTitle), "%t", "Confirm_Buy", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType]);
 			Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_Store, 0);
 			return;
@@ -1812,7 +1812,7 @@ public MenuHandler_Item(Handle:menu, MenuAction:action, client, param2)
 	{
 		new target = g_iMenuClient[client];
 		// Confirmation was sent
-		if(menu == INVALID_HANDLE)
+		if(menu == null)
 		{
 			if(param2 == 0)
 			{
@@ -1823,7 +1823,7 @@ public MenuHandler_Item(Handle:menu, MenuAction:action, client, param2)
 		}
 		else
 		{
-			decl String:m_szId[64];
+			char m_szId[64];
 			GetMenuItem(menu, param2, m_szId, sizeof(m_szId));
 			
 			new m_iId = StringToInt(m_szId);
@@ -1834,7 +1834,7 @@ public MenuHandler_Item(Handle:menu, MenuAction:action, client, param2)
 				decl ret;
 				for(new i=0;i<g_iMenuHandlers;++i)
 				{
-					if(g_eMenuHandlers[i][hPlugin] == INVALID_HANDLE)
+					if(g_eMenuHandlers[i][hPlugin] == null)
 						continue;
 					Call_StartFunction(g_eMenuHandlers[i][hPlugin], g_eMenuHandlers[i][fnHandler]);
 					Call_PushCell(client);
@@ -1869,7 +1869,7 @@ public MenuHandler_Item(Handle:menu, MenuAction:action, client, param2)
 						m_iCredits = RoundToCeil(m_iCredits*float(m_iLeft)/float(m_iLength));
 					}
 
-					decl String:m_szTitle[128];
+					char m_szTitle[128];
 					Format(m_szTitle, sizeof(m_szTitle), "%t", "Confirm_Sell", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType], m_iCredits);
 					g_iMenuNum[client] = 2;
 					Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_Item, 0);
@@ -1909,7 +1909,7 @@ public DisplayPlayerMenu(client)
 	SetMenuExitBackButton(m_hMenu, true);
 	SetMenuTitle(m_hMenu, "%t\n%t", "Title Gift", "Title Credits", g_eClients[client][iCredits]);
 	
-	decl String:m_szID[11];
+	char m_szID[11];
 	decl m_iFlags;
 	LoopIngamePlayers(i)
 	{
@@ -1945,7 +1945,7 @@ public MenuHandler_Gift(Handle:menu, MenuAction:action, client, param2)
 		new target = g_iMenuClient[client];
 	
 		// Confirmation was given
-		if(menu == INVALID_HANDLE)
+		if(menu == null)
 		{
 			m_iItem = Store_GetClientItemId(target, g_iSelectedItem[client]);
 			m_iReceiver = GetClientOfUserId(param2);
@@ -1960,7 +1960,7 @@ public MenuHandler_Gift(Handle:menu, MenuAction:action, client, param2)
 		}
 		else
 		{
-			decl String:m_szId[11];
+			char m_szId[11];
 			GetMenuItem(menu, param2, m_szId, sizeof(m_szId));
 			
 			new m_iId = StringToInt(m_szId);
@@ -1975,7 +1975,7 @@ public MenuHandler_Gift(Handle:menu, MenuAction:action, client, param2)
 			
 			if(g_eCvars[g_cvarConfirmation][aCache])
 			{
-				decl String:m_szTitle[128];
+				char m_szTitle[128];
 				Format(m_szTitle, sizeof(m_szTitle), "%t", "Confirm_Gift", g_eItems[g_iSelectedItem[client]][szName], g_eTypeHandlers[g_eItems[g_iSelectedItem[client]][iHandler]][szType], g_eClients[m_iReceiver][szName]);
 				Store_DisplayConfirmMenu(client, m_szTitle, MenuHandler_Gift, m_iId);
 				return;
@@ -1998,8 +1998,8 @@ public MenuHandler_Confirm(Handle:menu, MenuAction:action, client, param2)
 	{		
 		if(param2 == 0)
 		{
-			decl String:m_szCallback[32];
-			decl String:m_szData[11];
+			char m_szCallback[32];
+			char m_szData[11];
 			GetMenuItem(menu, 0, m_szCallback, sizeof(m_szCallback));
 			GetMenuItem(menu, 1, m_szData, sizeof(m_szData));
 			new m_iPos = FindCharInString(m_szCallback, '.');
@@ -2009,7 +2009,7 @@ public MenuHandler_Confirm(Handle:menu, MenuAction:action, client, param2)
 			if(fnMenuCallback != INVALID_FUNCTION)
 			{
 				Call_StartFunction(m_hPlugin, fnMenuCallback);
-				Call_PushCell(INVALID_HANDLE);
+				Call_PushCell(0);
 				Call_PushCell(MenuAction_Select);
 				Call_PushCell(client);
 				Call_PushCell(StringToInt(m_szData));
@@ -2092,12 +2092,12 @@ public Action:Timer_CreditTimer(Handle:timer, any:userid)
 public Action:Timer_DatabaseTimeout(Handle:timer, any:userid)
 {
 	// Database is connected successfully
-	if(g_hDatabase != INVALID_HANDLE)
+	if(g_dDatabase != null)
 		return Plugin_Stop;
 
 	if(g_iDatabaseRetries < g_eCvars[g_cvarDatabaseRetries][aCache])
 	{
-		SQL_TConnect(SQLCallback_Connect, g_eCvars[g_cvarDatabaseEntry][sCache]);
+		Database.Connect(SQLCallback_Connect, g_eCvars[g_cvarDatabaseEntry][sCache]);
 		CreateTimer(Float:g_eCvars[g_cvarDatabaseTimeout][aCache], Timer_DatabaseTimeout);
 		++g_iDatabaseRetries;
 	}
@@ -2114,25 +2114,26 @@ public Action:Timer_DatabaseTimeout(Handle:timer, any:userid)
 //		SQL CALLBACKS		//
 //////////////////////////////
 
-public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:data)
+public SQLCallback_Connect(Database db, const char[] error, any data)
 {
-	if(hndl==INVALID_HANDLE)
+	if (db != null)
 	{
 		SetFailState("Failed to connect to SQL database. Error: %s", error);
 	}
 	else
 	{
 		// If it's already connected we are good to go
-		if(g_hDatabase != INVALID_HANDLE)
+		if(g_dDatabase != null)
 			return;
 			
-		g_hDatabase = hndl;
-		decl String:m_szDriver[2];
-		SQL_ReadDriver(g_hDatabase, m_szDriver, sizeof(m_szDriver));
+		g_dDatabase = db;
+		char m_szDriver[2];
+		DBDriver iDriver = g_dDatabase.Driver;
+		iDriver.GetIdentifier(m_szDriver, sizeof(m_szDriver));
 		if(m_szDriver[0] == 'm')
 		{
 			g_bMySQL = true;
-			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_players` (\
+			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_players` (\
 										  `id` int(11) NOT NULL AUTO_INCREMENT,\
 										  `authid` varchar(32) NOT NULL,\
 										  `name` varchar(64) NOT NULL,\
@@ -2143,7 +2144,7 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  UNIQUE KEY `id` (`id`),\
 										  UNIQUE KEY `authid` (`authid`)\
 										)");
-			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_items` (\
+			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_items` (\
 										  `id` int(11) NOT NULL AUTO_INCREMENT,\
 										  `player_id` int(11) NOT NULL,\
 										  `type` varchar(16) NOT NULL,\
@@ -2152,13 +2153,13 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  `date_of_expiration` int(11) NOT NULL,\
 										  PRIMARY KEY (`id`)\
 										)");
-			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_equipment` (\
+			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_equipment` (\
 										  `player_id` int(11) NOT NULL,\
 										  `type` varchar(16) NOT NULL,\
 										  `unique_id` varchar(256) NOT NULL,\
 										  `slot` int(11) NOT NULL\
 										)");
-			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_logs` (\
+			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_logs` (\
 										  `id` int(11) NOT NULL AUTO_INCREMENT,\
 										  `player_id` int(11) NOT NULL,\
 										  `credits` int(11) NOT NULL,\
@@ -2166,8 +2167,8 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  `date` int(11) NOT NULL,\
 										  PRIMARY KEY (`id`)\
 										)");
-			SQL_TQuery(g_hDatabase, SQLCallback_NoError, "ALTER TABLE store_items ADD COLUMN price_of_purchase int(11)");
-			decl String:m_szQuery[512];
+			g_dDatabase.Query(SQLCallback_NoError, "ALTER TABLE store_items ADD COLUMN price_of_purchase int(11)");
+			char m_szQuery[512];
 			Format(m_szQuery, sizeof(m_szQuery), "CREATE TABLE IF NOT EXISTS `%s` (\
 										  `id` int(11) NOT NULL AUTO_INCREMENT,\
 										  `parent_id` int(11) NOT NULL DEFAULT '-1',\
@@ -2180,11 +2181,11 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  `supported_game` varchar(64) NOT NULL,\
 										  PRIMARY KEY (`id`)\
 										)", g_eCvars[g_cvarItemsTable][sCache]);
-			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+			SQL_TVoid(g_dDatabase, m_szQuery);
 		}
 		else
 		{
-			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_players` (\
+			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_players` (\
 										  `id` INTEGER PRIMARY KEY AUTOINCREMENT,\
 										  `authid` varchar(32) NOT NULL,\
 										  `name` varchar(64) NOT NULL,\
@@ -2192,7 +2193,7 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  `date_of_join` int(11) NOT NULL,\
 										  `date_of_last_join` int(11) NOT NULL\
 										)");
-			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_items` (\
+			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_items` (\
 										  `id` INTEGER PRIMARY KEY AUTOINCREMENT,\
 										  `player_id` int(11) NOT NULL,\
 										  `type` varchar(16) NOT NULL,\
@@ -2200,13 +2201,13 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  `date_of_purchase` int(11) NOT NULL,\
 										  `date_of_expiration` int(11) NOT NULL\
 										)");
-			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_equipment` (\
+			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_equipment` (\
 										  `player_id` int(11) NOT NULL,\
 										  `type` varchar(16) NOT NULL,\
 										  `unique_id` varchar(256) NOT NULL,\
 										  `slot` int(11) NOT NULL\
 										)");
-			SQL_TQuery(g_hDatabase, SQLCallback_NoError, "ALTER TABLE store_items ADD COLUMN price_of_purchase int(11)");
+			g_dDatabase.Query(SQLCallback_NoError, "ALTER TABLE store_items ADD COLUMN price_of_purchase int(11)");
 			if(strcmp(g_eCvars[g_cvarItemSource][sCache], "database")==0)
 			{
 	
@@ -2215,15 +2216,15 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 		}
 		
 		// Do some housekeeping
-		decl String:m_szQuery[256];
+		char m_szQuery[256];
 		Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE `date_of_expiration` <> 0 AND `date_of_expiration` < %d", GetTime());
-		SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+		SQL_TVoid(g_dDatabase, m_szQuery);
 	}
 }
 
-public SQLCallback_LoadClientInventory_Credits(Handle:owner, Handle:hndl, const String:error[], any:userid)
+public SQLCallback_LoadClientInventory_Credits(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if(hndl==INVALID_HANDLE)
+	if (db != null)
 		LogError("Error happened. Error: %s", error);
 	else
 	{
@@ -2231,26 +2232,26 @@ public SQLCallback_LoadClientInventory_Credits(Handle:owner, Handle:hndl, const 
 		if(!client)
 			return;
 		
-		decl String:m_szQuery[256];
-		decl String:m_szSteamID[32];
+		char m_szQuery[256];
+		char m_szSteamID[32];
 		new m_iTime = GetTime();
 		g_eClients[client][iUserId] = userid;
 		g_eClients[client][iItems] = -1;
 		GetLegacyAuthString(client, m_szSteamID, sizeof(m_szSteamID), false);
 		strcopy(g_eClients[client][szAuthId], 32, m_szSteamID[8]);
 		GetClientName(client, g_eClients[client][szName], 64);
-		SQL_EscapeString(g_hDatabase, g_eClients[client][szName], g_eClients[client][szNameEscaped], 128);
+		SQL_EscapeString(g_dDatabase, g_eClients[client][szName], g_eClients[client][szNameEscaped], 128);
 		
-		if(SQL_FetchRow(hndl))
+		if(results.FetchRow())
 		{
-			g_eClients[client][iId] = SQL_FetchInt(hndl, 0);
-			g_eClients[client][iCredits] = SQL_FetchInt(hndl, 3);
-			g_eClients[client][iOriginalCredits] = SQL_FetchInt(hndl, 3);
-			g_eClients[client][iDateOfJoin] = SQL_FetchInt(hndl, 4);
+			g_eClients[client][iId] = results.FetchInt(0);
+			g_eClients[client][iCredits] = results.FetchInt(3);
+			g_eClients[client][iOriginalCredits] = results.FetchInt(3);
+			g_eClients[client][iDateOfJoin] = results.FetchInt(4);
 			g_eClients[client][iDateOfLastJoin] = m_iTime;
 			
 			Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_items WHERE `player_id`=%d", g_eClients[client][iId]);
-			SQL_TQuery(g_hDatabase, SQLCallback_LoadClientInventory_Items, m_szQuery, userid);
+			g_dDatabase.Query(SQLCallback_LoadClientInventory_Items, m_szQuery, userid);
 
 			Store_LogMessage(client, g_eClients[client][iCredits], "Amount of credits when the player joined");
 			
@@ -2260,7 +2261,7 @@ public SQLCallback_LoadClientInventory_Credits(Handle:owner, Handle:hndl, const 
 		{
 			Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_players (`authid`, `name`, `credits`, `date_of_join`, `date_of_last_join`) VALUES(\"%s\", '%s', %d, %d, %d)",
 						g_eClients[client][szAuthId], g_eClients[client][szNameEscaped], g_eCvars[g_cvarStartCredits][aCache], m_iTime, m_iTime);
-			SQL_TQuery(g_hDatabase, SQLCallback_InsertClient, m_szQuery, userid);
+			g_dDatabase.Query(SQLCallback_InsertClient, m_szQuery, userid);
 			g_eClients[client][iCredits] = g_eCvars[g_cvarStartCredits][aCache];
 			g_eClients[client][iOriginalCredits] = g_eCvars[g_cvarStartCredits][aCache];
 			g_eClients[client][iDateOfJoin] = m_iTime;
@@ -2276,9 +2277,9 @@ public SQLCallback_LoadClientInventory_Credits(Handle:owner, Handle:hndl, const 
 	}
 }
 
-public SQLCallback_LoadClientInventory_Items(Handle:owner, Handle:hndl, const String:error[], any:userid)
+public SQLCallback_LoadClientInventory_Items(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if(hndl==INVALID_HANDLE)
+	if (db != null)
 		LogError("Error happened. Error: %s", error);
 	else
 	{	
@@ -2286,42 +2287,42 @@ public SQLCallback_LoadClientInventory_Items(Handle:owner, Handle:hndl, const St
 		if(!client)
 			return;
 
-		decl String:m_szQuery[256];
+		char m_szQuery[256];
 		Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_equipment WHERE `player_id`=%d", g_eClients[client][iId]);
-		SQL_TQuery(g_hDatabase, SQLCallback_LoadClientInventory_Equipment, m_szQuery, userid);
+		g_dDatabase.Query(SQLCallback_LoadClientInventory_Equipment, m_szQuery, userid);
 
-		if(!SQL_GetRowCount(hndl))
+		if(!results.RowCount)
 		{
 			g_eClients[client][bLoaded] = true;
 			g_eClients[client][iItems] = 0;
 			return;
 		}
 		
-		decl String:m_szUniqueId[PLATFORM_MAX_PATH];
-		decl String:m_szType[16];
+		char m_szUniqueId[PLATFORM_MAX_PATH];
+		char m_szType[16];
 		decl m_iExpiration;
 		decl m_iUniqueId;
 		new m_iTime = GetTime();
 		
 		new i = 0;
-		while(SQL_FetchRow(hndl))
+		while(results.FetchRow())
 		{
 			m_iUniqueId = -1;
-			m_iExpiration = SQL_FetchInt(hndl, 5);
+			m_iExpiration = results.FetchInt(5);
 			if(m_iExpiration && m_iExpiration<=m_iTime)
 				continue;
 			
-			SQL_FetchString(hndl, 2, m_szType, sizeof(m_szType));
-			SQL_FetchString(hndl, 3, m_szUniqueId, sizeof(m_szUniqueId));
+			results.FetchString(2, m_szType, sizeof(m_szType));
+			results.FetchString(3, m_szUniqueId, sizeof(m_szUniqueId));
 			while((m_iUniqueId = Store_GetItemId(m_szType, m_szUniqueId, m_iUniqueId))!=-1)
 			{
-				g_eClientItems[client][i][iId] = SQL_FetchInt(hndl, 0);
+				g_eClientItems[client][i][iId] = results.FetchInt(0);
 				g_eClientItems[client][i][iUniqueId] = m_iUniqueId;
 				g_eClientItems[client][i][bSynced] = true;
 				g_eClientItems[client][i][bDeleted] = false;
-				g_eClientItems[client][i][iDateOfPurchase] = SQL_FetchInt(hndl, 4);
+				g_eClientItems[client][i][iDateOfPurchase] = results.FetchInt(4);
 				g_eClientItems[client][i][iDateOfExpiration] = m_iExpiration;
-				g_eClientItems[client][i][iPriceOfPurchase] = SQL_FetchInt(hndl, 6);
+				g_eClientItems[client][i][iPriceOfPurchase] = results.FetchInt(6);
 			
 				++i;
 			}
@@ -2330,9 +2331,9 @@ public SQLCallback_LoadClientInventory_Items(Handle:owner, Handle:hndl, const St
 	}
 }
 
-public SQLCallback_LoadClientInventory_Equipment(Handle:owner, Handle:hndl, const String:error[], any:userid)
+public SQLCallback_LoadClientInventory_Equipment(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if(hndl==INVALID_HANDLE)
+	if (db != null)
 		LogError("Error happened. Error: %s", error);
 	else
 	{
@@ -2340,14 +2341,14 @@ public SQLCallback_LoadClientInventory_Equipment(Handle:owner, Handle:hndl, cons
 		if(!client)
 			return;
 		
-		decl String:m_szUniqueId[PLATFORM_MAX_PATH];
-		decl String:m_szType[16];
+		char m_szUniqueId[PLATFORM_MAX_PATH];
+		char m_szType[16];
 		decl m_iUniqueId;
 		
-		while(SQL_FetchRow(hndl))
+		while(results.FetchRow())
 		{
-			SQL_FetchString(hndl, 1, m_szType, sizeof(m_szType));
-			SQL_FetchString(hndl, 2, m_szUniqueId, sizeof(m_szUniqueId));
+			results.FetchString(1, m_szType, sizeof(m_szType));
+			results.FetchString(2, m_szUniqueId, sizeof(m_szUniqueId));
 			m_iUniqueId = Store_GetItemId(m_szType, m_szUniqueId);
 			if(m_iUniqueId == -1)
 				continue;
@@ -2355,15 +2356,15 @@ public SQLCallback_LoadClientInventory_Equipment(Handle:owner, Handle:hndl, cons
 			if(!Store_HasClientItem(client, m_iUniqueId))
 				Store_UnequipItem(client, m_iUniqueId);
 			else
-				Store_UseItem(client, m_iUniqueId, true, SQL_FetchInt(hndl, 3));
+				Store_UseItem(client, m_iUniqueId, true, results.FetchInt(3));
 		}
 		g_eClients[client][bLoaded] = true;
 	}
 }
 
-public SQLCallback_RefreshCredits(Handle:owner, Handle:hndl, const String:error[], any:userid)
+public SQLCallback_RefreshCredits(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if(hndl==INVALID_HANDLE)
+	if (db != null)
 		LogError("Error happened. Error: %s", error);
 	else
 	{
@@ -2371,17 +2372,17 @@ public SQLCallback_RefreshCredits(Handle:owner, Handle:hndl, const String:error[
 		if(!client)
 			return;
 			
-		if(SQL_FetchRow(hndl))
+		if(results.FetchRow())
 		{
-			g_eClients[client][iCredits] = SQL_FetchInt(hndl, 3);
-			g_eClients[client][iOriginalCredits] = SQL_FetchInt(hndl, 3);
+			g_eClients[client][iCredits] = results.FetchInt(3);
+			g_eClients[client][iOriginalCredits] = results.FetchInt(3);
 		}
 	}
 }
 
-public SQLCallback_InsertClient(Handle:owner, Handle:hndl, const String:error[], any:userid)
+public SQLCallback_InsertClient(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if(hndl==INVALID_HANDLE)
+	if (db != null)
 		LogError("Error happened. Error: %s", error);
 	else
 	{
@@ -2389,23 +2390,23 @@ public SQLCallback_InsertClient(Handle:owner, Handle:hndl, const String:error[],
 		if(!client)
 			return;
 			
-		g_eClients[client][iId] = SQL_GetInsertId(hndl);
+		g_eClients[client][iId] = results.InsertId;
 	}
 }
 
-public SQLCallback_ReloadConfig(Handle:owner, Handle:hndl, const String:error[], any:userid)
+public SQLCallback_ReloadConfig(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if(hndl==INVALID_HANDLE)
+	if (db != null)
 	{
 		SetFailState("Error happened reading the config table. The plugin cannot continue.", error);
 	}
 	else
 	{
-		decl String:m_szType[64];
-		decl String:m_szFlag[64];
-		decl String:m_szInfo[2048];
-		decl String:m_szKey[64];
-		decl String:m_szValue[256];
+		char m_szType[64];
+		char m_szFlag[64];
+		char m_szInfo[2048];
+		char m_szKey[64];
+		char m_szValue[256];
 		
 		decl Handle:m_hKV;
 		
@@ -2415,32 +2416,32 @@ public SQLCallback_ReloadConfig(Handle:owner, Handle:hndl, const String:error[],
 		decl m_iHandler;
 		new m_iIndex = 0;
 	
-		while(SQL_FetchRow(hndl))
+		while(results.FetchRow())
 		{
 			if(g_iItems == STORE_MAX_ITEMS)
 				return;
 				
-			if(!SQL_FetchInt(hndl, 7))
+			if(!results.FetchInt(7))
 				continue;
 			
-			g_eItems[g_iItems][iId] = SQL_FetchInt(hndl, 0);
-			g_eItems[g_iItems][iParent] = SQL_FetchInt(hndl, 1);
-			g_eItems[g_iItems][iPrice] = SQL_FetchInt(hndl, 2);
+			g_eItems[g_iItems][iId] = results.FetchInt(0);
+			g_eItems[g_iItems][iParent] = results.FetchInt(1);
+			g_eItems[g_iItems][iPrice] = results.FetchInt(2);
 			
 			IntToString(g_eItems[g_iItems][iId], g_eItems[g_iItems][szUniqueId], PLATFORM_MAX_PATH);
 			
-			SQL_FetchString(hndl, 3, m_szType, sizeof(m_szType));
+			results.FetchString(3, m_szType, sizeof(m_szType));
 			m_iHandler = Store_GetTypeHandler(m_szType);
 			if(m_iHandler == -1)
 				continue;
 			
 			g_eItems[g_iItems][iHandler] = m_iHandler;
 			
-			SQL_FetchString(hndl, 4, m_szFlag, sizeof(m_szFlag));
+			results.FetchString(4, m_szFlag, sizeof(m_szFlag));
 			g_eItems[g_iItems][iFlagBits] = ReadFlagString(m_szFlag);
 			
-			SQL_FetchString(hndl, 5, g_eItems[g_iItems][szName], ITEM_NAME_LENGTH);
-			SQL_FetchString(hndl, 6, m_szInfo, sizeof(m_szInfo));
+			results.FetchString(5, g_eItems[g_iItems][szName], ITEM_NAME_LENGTH);
+			results.FetchString(6, m_szInfo, sizeof(m_szInfo));
 			
 			m_hKV = CreateKeyValues("Additional Info");
 			
@@ -2470,28 +2471,28 @@ public SQLCallback_ReloadConfig(Handle:owner, Handle:hndl, const String:error[],
 	}
 }
 
-public SQLCallback_ResetPlayer(Handle:owner, Handle:hndl, const String:error[], any:userid)
+public SQLCallback_ResetPlayer(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if(hndl==INVALID_HANDLE)
+	if (db != null)
 		LogError("Error happened. Error: %s", error);
 	else
 	{
 		new client = GetClientOfUserId(userid);
 
-		if(SQL_GetRowCount(hndl))
+		if(results.RowCount)
 		{
-			SQL_FetchRow(hndl);
-			new id = SQL_FetchInt(hndl, 0);
-			decl String:m_szAuthId[32];
-			SQL_FetchString(hndl, 1, m_szAuthId, sizeof(m_szAuthId));
+			results.FetchRow();
+			new id = results.FetchInt(0);
+			char m_szAuthId[32];
+			results.FetchString(1, m_szAuthId, sizeof(m_szAuthId));
 
-			decl String:m_szQuery[512];
+			char m_szQuery[512];
 			Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_players WHERE id=%d", id);
-			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+			SQL_TVoid(g_dDatabase, m_szQuery);
 			Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE player_id=%d", id);
-			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+			SQL_TVoid(g_dDatabase, m_szQuery);
 			Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_equipment WHERE player_id=%d", id);
-			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+			SQL_TVoid(g_dDatabase, m_szQuery);
 
 			CPrintToChatAll("%t", "Player Resetted", m_szAuthId);
 
@@ -2508,14 +2509,14 @@ public SQLCallback_ResetPlayer(Handle:owner, Handle:hndl, const String:error[], 
 
 public Store_LoadClientInventory(client)
 {
-	if(g_hDatabase == INVALID_HANDLE)
+	if(g_dDatabase == null)
 	{
 		LogError("Database connection is lost or not yet initialized.");
 		return;
 	}
 	
-	decl String:m_szQuery[256];
-	decl String:m_szAuthId[32];
+	char m_szQuery[256];
+	char m_szAuthId[32];
 
 	GetLegacyAuthString(client, m_szAuthId, sizeof(m_szAuthId));
 	if(m_szAuthId[0] == 0)
@@ -2523,12 +2524,12 @@ public Store_LoadClientInventory(client)
 
 	Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_players WHERE `authid`=\"%s\"", m_szAuthId[8]);
 
-	SQL_TQuery(g_hDatabase, SQLCallback_LoadClientInventory_Credits, m_szQuery, g_eClients[client][iUserId]);
+	g_dDatabase.Query(SQLCallback_LoadClientInventory_Credits, m_szQuery, g_eClients[client][iUserId]);
 }
 
 public Store_SaveClientInventory(client)
 {
-	if(g_hDatabase == INVALID_HANDLE)
+	if(g_dDatabase == null)
 	{
 		LogError("Database connection is lost or not yet initialized.");
 		return;
@@ -2538,9 +2539,9 @@ public Store_SaveClientInventory(client)
 	if(g_eClients[client][iCredits]==-1 && g_eClients[client][iItems]==-1)
 		return;
 	
-	decl String:m_szQuery[256];
-	decl String:m_szType[16];
-	decl String:m_szUniqueId[PLATFORM_MAX_PATH];
+	char m_szQuery[256];
+	char m_szType[16];
+	char m_szUniqueId[PLATFORM_MAX_PATH];
 	
 	for(new i=0;i<g_eClients[client][iItems];++i)
 	{
@@ -2551,7 +2552,7 @@ public Store_SaveClientInventory(client)
 		{
 			g_eClientItems[client][i][bSynced] = true;
 			Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_items (`player_id`, `type`, `unique_id`, `date_of_purchase`, `date_of_expiration`, `price_of_purchase`) VALUES(%d, \"%s\", \"%s\", %d, %d, %d)", g_eClients[client][iId], m_szType, m_szUniqueId, g_eClientItems[client][i][iDateOfPurchase], g_eClientItems[client][i][iDateOfExpiration], g_eClientItems[client][i][iPriceOfPurchase]);
-			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+			SQL_TVoid(g_dDatabase, m_szQuery);
 		} else if(g_eClientItems[client][i][bSynced] && g_eClientItems[client][i][bDeleted])
 		{
 			// Might have been synced already but ID wasn't acquired
@@ -2559,14 +2560,14 @@ public Store_SaveClientInventory(client)
 				Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE `player_id`=%d AND `type`=\"%s\" AND `unique_id`=\"%s\"", g_eClients[client][iId], m_szType, m_szUniqueId);
 			else
 				Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE `id`=%d", g_eClientItems[client][i][iId]);
-			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+			SQL_TVoid(g_dDatabase, m_szQuery);
 		}
 	}
 }
 
 public Store_SaveClientEquipment(client)
 {
-	decl String:m_szQuery[256];
+	char m_szQuery[256];
 	decl m_iId;
 	for(new i=0;i<STORE_MAX_HANDLERS;++i)
 	{
@@ -2584,7 +2585,7 @@ public Store_SaveClientEquipment(client)
 			else
 				Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_equipment (`player_id`, `type`, `unique_id`, `slot`) VALUES(%d, \"%s\", \"%s\", %d)", g_eClients[client][iId], g_eTypeHandlers[i][szType], g_eItems[g_eClients[client][aEquipment][m_iId]][szUniqueId], a);
 
-			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+			SQL_TVoid(g_dDatabase, m_szQuery);
 			g_eClients[client][aEquipmentSynced][m_iId] = g_eClients[client][aEquipment][m_iId];
 		}
 	}
@@ -2592,7 +2593,7 @@ public Store_SaveClientEquipment(client)
 
 public Store_SaveClientData(client)
 {
-	if(g_hDatabase == INVALID_HANDLE)
+	if(g_dDatabase == null)
 	{
 		LogError("Database connection is lost or not yet initialized.");
 		return;
@@ -2601,7 +2602,7 @@ public Store_SaveClientData(client)
 	if((g_eClients[client][iCredits]==-1 && g_eClients[client][iItems]==-1) || !g_eClients[client][bLoaded])
 		return;
 	
-	decl String:m_szQuery[256];
+	char m_szQuery[256];
 	if(g_bMySQL)
 		Format(m_szQuery, sizeof(m_szQuery), "UPDATE store_players SET `credits`=GREATEST(`credits`+%d,0), `date_of_last_join`=%d, `name`='%s' WHERE `id`=%d", g_eClients[client][iCredits]-g_eClients[client][iOriginalCredits], g_eClients[client][iDateOfLastJoin], g_eClients[client][szNameEscaped], g_eClients[client][iId]);
 	else
@@ -2609,7 +2610,7 @@ public Store_SaveClientData(client)
 
 	g_eClients[client][iOriginalCredits] = g_eClients[client][iCredits];
 
-	SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+	SQL_TVoid(g_dDatabase, m_szQuery);
 }
 
 public Store_DisconnectClient(client)
@@ -2789,9 +2790,9 @@ public Store_ReloadConfig()
 
 	if(strcmp(g_eCvars[g_cvarItemSource][sCache], "database")==0)
 	{
-		decl String:m_szQuery[64];
+		char m_szQuery[64];
 		Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM %s WHERE supported_games LIKE \"%%%s%%\" OR supported_games = \"\"", g_eCvars[g_cvarItemsTable][sCache], g_szGameDir);
-		SQL_TQuery(g_hDatabase, SQLCallback_ReloadConfig, m_szQuery);
+		g_dDatabase.Query(SQLCallback_ReloadConfig, m_szQuery);
 	}
 	else
 	{	
@@ -2811,9 +2812,9 @@ public Store_ReloadConfig()
 
 Store_WalkConfig(&Handle:kv, parent=-1)
 {
-	decl String:m_szType[32];
-	decl String:m_szGame[64];
-	decl String:m_szFlags[64];
+	char m_szType[32];
+	char m_szGame[64];
+	char m_szFlags[64];
 	decl m_iHandler;
 	decl bool:m_bSuccess;
 	do
@@ -2893,7 +2894,7 @@ Store_WalkConfig(&Handle:kv, parent=-1)
 
 			if(g_eItems[g_iItems][hAttributes])
 				CloseHandle(g_eItems[g_iItems][hAttributes]);
-			g_eItems[g_iItems][hAttributes] = INVALID_HANDLE;
+			g_eItems[g_iItems][hAttributes] = null;
 			if(KvJumpToKey(kv, "Attributes"))
 			{
 				g_eItems[g_iItems][hAttributes] = CreateTrie();
@@ -3054,7 +3055,7 @@ Store_LogMessage(client, credits, const String:message[], ...)
 	if(!g_eCvars[g_cvarLogging][aCache])
 		return;
 
-	decl String:m_szReason[256];
+	char m_szReason[256];
 	VFormat(m_szReason, sizeof(m_szReason), message, 4);
 
 	if(g_eCvars[g_cvarLogging][aCache] == 1)
@@ -3062,9 +3063,9 @@ Store_LogMessage(client, credits, const String:message[], ...)
 		LogToOpenFileEx(g_hLogFile, "%N's credits have changed by %d. Reason: %s", client, credits, m_szReason);
 	} else if(g_eCvars[g_cvarLogging][aCache] == 2)
 	{
-		decl String:m_szQuery[256];
+		char m_szQuery[256];
 		Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_logs (player_id, credits, reason, date) VALUES(%d, %d, \"%s\", %d)", g_eClients[client][iId], credits, m_szReason, GetTime());
-		SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
+		SQL_TVoid(g_dDatabase, m_szQuery);
 	}
 }
 
@@ -3105,9 +3106,9 @@ public Store_OnPaymentReceived(FriendID, quanity, Handle:data)
 			new m_unMod = FriendID % 2;
 			new m_unAccountID = (FriendID-m_unMod)/2;
 
-			decl String:m_szQuery[256];
+			char m_szQuery[256];
 			Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_players WHERE `authid`=\"%d:%d\"", m_unMod, m_unAccountID);
-			SQL_TQuery(g_hDatabase, SQLCallback_LoadClientInventory_Credits, m_szQuery, GetClientUserId(i));
+			g_dDatabase.Query(SQLCallback_LoadClientInventory_Credits, m_szQuery, GetClientUserId(i));
 			break;
 		}
 	}
