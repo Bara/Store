@@ -205,7 +205,7 @@ Store_SetClientModel(client, const String:model[], const skin=0, const String:ar
 
 	SetEntProp(client, Prop_Send, "m_nSkin", skin);
 
-	if(GAME_CSGO & arms[0]!=0)
+	if(GAME_CSGO && arms[0] != 0)
 	{
 		SetEntPropString(client, Prop_Send, "m_szArmsModel", arms);
 	}

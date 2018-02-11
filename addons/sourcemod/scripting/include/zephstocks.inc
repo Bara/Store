@@ -28,36 +28,36 @@ enum CVAR_CACHE
 	Function:fnCallback
 }
 
-new g_eCvars[MAX_CVARS][CVAR_CACHE];
+int g_eCvars[MAX_CVARS][CVAR_CACHE];
 
-new g_iCvars = 0;
+int g_iCvars = 0;
 
-new GAME_CSS = false;
-new GAME_CSGO = false;
-new GAME_DOD = false;
-new GAME_TF2 = false;
-new GAME_L4D = false;
-new GAME_L4D2 = false;
+bool GAME_CSS = false;
+bool GAME_CSGO = false;
+bool GAME_DOD = false;
+bool GAME_TF2 = false;
+bool GAME_L4D = false;
+bool GAME_L4D2 = false;
 
-new String:g_szGameDir[64];
+char g_szGameDir[64];
 
-#define LoopConnectedClients(%1) for(new %1=1;%1<=MaxClients;++%1)\
+#define LoopConnectedClients(%1) for(int %1=1;%1<=MaxClients;++%1)\
 								if(IsClientConnected(%1))
 
-#define LoopIngameClients(%1) for(new %1=1;%1<=MaxClients;++%1)\
+#define LoopIngameClients(%1) for(int %1=1;%1<=MaxClients;++%1)\
 								if(IsClientInGame(%1))
 
-#define LoopIngamePlayers(%1) for(new %1=1;%1<=MaxClients;++%1)\
+#define LoopIngamePlayers(%1) for(int %1=1;%1<=MaxClients;++%1)\
 								if(IsClientInGame(%1) && !IsFakeClient(%1))
 								
-#define LoopAuthorizedPlayers(%1) for(new %1=1;%1<=MaxClients;++%1)\
+#define LoopAuthorizedPlayers(%1) for(int %1=1;%1<=MaxClients;++%1)\
 								if(IsClientConnected(%1) && IsClientAuthorized(%1))
 								
-#define LoopAlivePlayers(%1) for(new %1=1;%1<=MaxClients;++%1)\
+#define LoopAlivePlayers(%1) for(int %1=1;%1<=MaxClients;++%1)\
 								if(IsClientInGame(%1) && IsPlayerAlive(%1))
 
 
-stock bool:IdentifyGame()
+stock bool IdentifyGame()
 {
 	// Identify the game
 	GetGameFolderName(g_szGameDir, sizeof(g_szGameDir));
@@ -88,15 +88,16 @@ stock bool:IdentifyGame()
 	}
 }
 
-stock bool:PrintKeyHintText(client, const String:format[], any:...)
+stock bool PrintKeyHintText(int client, const char[] format, any ...)
 {
-	new Handle:userMessage = StartMessageOne("KeyHintText", client);
+	Handle userMessage = StartMessageOne("KeyHintText", client);
 
-	if (userMessage == INVALID_HANDLE) {
-			return false;
+	if (userMessage == null)
+	{
+		return false;
 	}
 
-	decl String:buffer[254];
+	char buffer[254];
 
 	SetGlobalTransTarget(client);
 	VFormat(buffer, sizeof(buffer), format, 3);
@@ -117,12 +118,16 @@ stock bool:PrintKeyHintText(client, const String:format[], any:...)
 	return true;
 }
 
-stock HookConVar(String:name[], CVAR_TYPE:type, Function:callback=INVALID_FUNCTION)
+stock int HookConVar(char[] name, CVAR_TYPE type, Function callback = INVALID_FUNCTION)
 {
-	new Handle:cvar = FindConVar(name);
-	if(cvar == INVALID_HANDLE)
+	ConVar cvar = FindConVar(name);
+
+	if(cvar == null)
+	{
 		return -1;
-	HookConVarChange(cvar, GlobalConVarChanged);
+	}
+
+	cvar.AddChangeHook( GlobalConVarChanged);
 	g_eCvars[g_iCvars][hCvar] = cvar;
 	g_eCvars[g_iCvars][eType] = type;
 	g_eCvars[g_iCvars][fnCallback] = callback;
@@ -130,10 +135,10 @@ stock HookConVar(String:name[], CVAR_TYPE:type, Function:callback=INVALID_FUNCTI
 	return g_iCvars++;
 }
 
-stock RegisterConVar(String:name[], String:value[], String:description[], CVAR_TYPE:type, Function:callback=INVALID_FUNCTION, flags=0, bool:hasMin=false, Float:min=0.0, bool:hasMax=false, Float:max=0.0)
+stock int RegisterConVar(char[] name, char[] value, char[] description, CVAR_TYPE type, Function callback = INVALID_FUNCTION, int flags = 0, bool hasMin = false, float min = 0.0, bool hasMax = false, float max = 0.0)
 {
-	new Handle:cvar = CreateConVar(name, value, description, flags, hasMin, min, hasMax, max);
-	HookConVarChange(cvar, GlobalConVarChanged);
+	ConVar cvar = CreateConVar(name, value, description, flags, hasMin, min, hasMax, max);
+	cvar.AddChangeHook(GlobalConVarChanged);
 	g_eCvars[g_iCvars][hCvar] = cvar;
 	g_eCvars[g_iCvars][eType] = type;
 	g_eCvars[g_iCvars][fnCallback] = callback;
@@ -141,84 +146,108 @@ stock RegisterConVar(String:name[], String:value[], String:description[], CVAR_T
 	return g_iCvars++;
 }
 
-public GlobalConVarChanged(Handle:convar, const String:oldValue[], const String:newValue[])
+public void GlobalConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-	for(new i=0;i<g_iCvars;++i)
-		if(g_eCvars[i][hCvar]==convar)
+	for(int j = 0; j < g_iCvars; ++j)
+	{
+		if(g_eCvars[j][hCvar] == convar)
 		{
-			CacheCvarValue(i);
-		
-			if(g_eCvars[i][fnCallback]!=INVALID_FUNCTION)
+			CacheCvarValue(j);
+
+			if(g_eCvars[j][fnCallback] != INVALID_FUNCTION)
 			{
-				Call_StartFunction(INVALID_HANDLE, g_eCvars[i][fnCallback]);
-				Call_PushCell(i);
+				Call_StartFunction(null, g_eCvars[j][fnCallback]);
+				Call_PushCell(j);
 				Call_Finish();
 			}
-		
+
 			return;
 		}
+	}
 }
 
-public CacheCvarValue(index)
+stock void CacheCvarValue(int index)
 {
 	GetConVarString(g_eCvars[index][hCvar], g_eCvars[index][sCache], CVAR_LENGTH);
-	if(g_eCvars[index][eType]==TYPE_INT)
-		g_eCvars[index][aCache] = GetConVarInt(g_eCvars[index][hCvar]);
-	else if(g_eCvars[index][eType]==TYPE_FLOAT)
-		g_eCvars[index][aCache] = GetConVarFloat(g_eCvars[index][hCvar]);
-	else if(g_eCvars[index][eType]==TYPE_FLAG)
-		g_eCvars[index][aCache] = ReadFlagString(g_eCvars[index][sCache]);
-}
 
-public SQLCallback_Void(Handle:owner, Handle:hndl, const String:error[], any:suspend_errors)
-{
-	if(hndl==INVALID_HANDLE && !suspend_errors)
-		LogError("SQL error happened. Error: %s", error);
-}
-
-public SQLCallback_Void_PrintQuery(Handle:owner, Handle:hndl, const String:error[], any:data)
-{
-	if(hndl==INVALID_HANDLE)
+	if(g_eCvars[index][eType] == TYPE_INT)
 	{
-		new String:query[2048];
+		g_eCvars[index][aCache] = GetConVarInt(g_eCvars[index][hCvar]);
+	}
+	else if(g_eCvars[index][eType] == TYPE_FLOAT)
+	{
+		g_eCvars[index][aCache] = GetConVarFloat(g_eCvars[index][hCvar]);
+	}
+	else if(g_eCvars[index][eType] == TYPE_FLAG)
+	{
+		g_eCvars[index][aCache] = ReadFlagString(g_eCvars[index][sCache]);
+	}
+}
+
+public void SQLCallback_Void(Database db, DBResultSet results, const char[] error, any data)
+{
+	if(db == null && !data)
+	{
+		LogError("SQL error happened. Error: %s", error);
+	}
+}
+
+public void SQLCallback_Void_PrintQuery(Database db, DBResultSet results, const char[] error, any data)
+{
+	if(db == null)
+	{
+		char query[2048];
 		ReadPackString(data, query, sizeof(query));
 		LogError("SQL error happened.\nQuery: %s\nError: %s", query, error);
 	}
 	CloseHandle(data);
 }
 
-public SQL_TVoid(Handle:db, String:query[])
+public void SQL_TVoid(Database db, char[] query)
 {
-	new Handle:data = CreateDataPack();
-	WritePackString(data, query);
-	ResetPack(data);
-	SQL_TQuery(db, SQLCallback_Void_PrintQuery, query, data);
+	DataPack data = new DataPack();
+	data.WriteString(query);
+	data.Reset();
+	db.Query(SQLCallback_Void_PrintQuery, query, data);
 }
 
-public SQLCallback_NoError(Handle:owner, Handle:hndl, const String:error[], any:suspend_errors)
+public void SQLCallback_NoError(Handle owner, Handle hndl, const char[] error, any data)
 {
 }
 
-stock GetClientBySteamID(String:steamid[])
+stock int GetClientBySteamID(char[] steamid)
 {
-	new String:authid[32];
-	for(new i=1;i<=MaxClients;++i)
+	char authid[32];
+
+	for(int i=1;i<=MaxClients;++i)
 	{
 		if(!IsClientInGame(i))
+		{
 			continue;
+		}
+
 		if(!IsClientAuthorized(i))
+		{
 			continue;
-		GetClientAuthId(i, AuthId_Steam2, authid, sizeof(authid));
+		}
+
+		if (GetClientAuthId(i, AuthId_Steam2, authid, sizeof(authid)))
+		{
+			return 0;
+		}
+
 		if(strcmp(authid[8], steamid[8])==0 || strcmp(authid, steamid)==0)
+		{
 			return i;
+		}
 	}
 	return 0;
 }
 
-stock GetClientSightEnd(client, Float:out[3])
+stock Handle GetClientSightEnd(int client, float out[3])
 {
-	decl Float:m_fEyes[3];
-	decl Float:m_fAngles[3];
+	float m_fEyes[3];
+	float m_fAngles[3];
 	GetClientEyePosition(client, m_fEyes);
 	GetClientEyeAngles(client, m_fAngles);
 	TR_TraceRayFilter(m_fEyes, m_fAngles, MASK_PLAYERSOLID, RayType_Infinite, TraceRayDontHitPlayers);
@@ -226,31 +255,42 @@ stock GetClientSightEnd(client, Float:out[3])
 		TR_GetEndPosition(out);
 }
 
-stock GetClientByIP(String:ip[])
+stock int GetClientByIP(char[] ip)
 {
-	decl String:client_ip[16];
-	for(new i=1;i<=MaxClients;++i)
+	char client_ip[16];
+	for(int i=1;i<=MaxClients;++i)
 	{
 		if(!IsClientInGame(i))
+		{
 			continue;
-		GetClientIP(i, client_ip, sizeof(client_ip));
+		}
+
+		if (GetClientIP(i, client_ip, sizeof(client_ip)))
+		{
+			return 0;
+		}
+
 		if(strcmp(client_ip, ip)==0)
 			return i;
 	}
 	return 0;
 }
 
-stock bool:GetClientPrivilege(client, flag, flags=-1)
+stock bool GetClientPrivilege(int client, int flag, int flags=-1)
 {
 	if(flags==-1)
+	{
 		flags = GetUserFlagBits(client);
+	}
 	
 	if(flag == 0 || flags & flag || flags & ADMFLAG_ROOT)
+	{
 		return true;
+	}
 	return false;
 }
 
-stock bool:GetCommunityID(String:AuthID[], String:FriendID[], size)
+stock bool GetCommunityID(char[] AuthID, char[] FriendID, int size)
 {
 	if(strlen(AuthID) < 11 || AuthID[0]!='S' || AuthID[6]=='I')
 	{
@@ -269,59 +309,67 @@ stock bool:GetCommunityID(String:AuthID[], String:FriendID[], size)
 	return true;
 }
 
-stock CloseClientMenu(client)
+stock int CloseClientMenu(int client)
 {
-	new Handle:m_hMenu = CreateMenu(MenuHandler_CloseClientMenu);
-	SetMenuTitle(m_hMenu, "Empty menu");
-	DisplayMenu(m_hMenu, client, 1);
+	Menu m_hMenu = new Menu(MenuHandler_CloseClientMenu);
+	m_hMenu.SetTitle("Empty menu");
+	m_hMenu.Display(client, 1);
 }
 
-public MenuHandler_CloseClientMenu(Handle:menu, MenuAction:action, client, param2)
+public int MenuHandler_CloseClientMenu(Menu menu, MenuAction action, int param1, int param2)
 {
 	if (action == MenuAction_End)
+	{
 		CloseHandle(menu);
+	}
 }
 
-public bool:TraceRayDontHitSelf(entity, mask, any:data)
+public bool TraceRayDontHitSelf(int entity, int mask, any data)
 {
 	if(entity == data)
+	{
 		return false;
+	}
+
 	return true;
 }
 
-public bool:TraceRayDontHitPlayers(entity, mask, any:data)
+public bool TraceRayDontHitPlayers(int entity, int mask, any data)
 {
 	if(0 < entity <= MaxClients)
+	{
 		return false;
+	}
+
 	return true;
 }
 
-public CreateCountdown(client, seconds, String:format[])
+stock void CreateCountdown(int client, int seconds, const char[] format)
 {
-	new Handle:pack = CreateDataPack();
-	WritePackCell(pack, GetClientUserId(client));
-	WritePackCell(pack, seconds);
-	WritePackString(pack, format);
-	ResetPack(pack);
+	DataPack pack = new DataPack();
+	pack.WriteCell(GetClientUserId(client));
+	pack.WriteCell(seconds);
+	pack.WriteString(format);
+	pack.Reset();
 
 	CreateTimer(0.0, Timer_Countdown, pack);
 }
 
-public CreateCountdownAll(seconds, String:format[])
+stock void CreateCountdownAll(int seconds, const char[] format)
 {
-	new Handle:pack = CreateDataPack();
-	WritePackCell(pack, 0);
-	WritePackCell(pack, seconds);
-	WritePackString(pack, format);
-	ResetPack(pack);
+	DataPack pack = new DataPack();
+	pack.WriteCell(0);
+	pack.WriteCell(seconds);
+	pack.WriteString(format);
+	pack.Reset();
 
 	CreateTimer(0.0, Timer_Countdown, pack);
 }
 
-public Action:Timer_Countdown(Handle:timer, any:pack)
+public Action Timer_Countdown(Handle timer, DataPack pack)
 {
-	new userid = ReadPackCell(pack);
-	decl client;
+	int userid = pack.ReadCell();
+	int client;
 	if(userid!=0)
 	{
 		client = GetClientOfUserId(userid);
@@ -332,8 +380,8 @@ public Action:Timer_Countdown(Handle:timer, any:pack)
 		}
 	}
 
-	new seconds = ReadPackCell(pack);
-	decl String:format[192];
+	int seconds = pack.ReadCell();
+	char format[192];
 	ReadPackString(pack, format, sizeof(format));
 
 	if(userid != 0)
@@ -343,10 +391,10 @@ public Action:Timer_Countdown(Handle:timer, any:pack)
 
 	if(seconds != 1)
 	{
-		ResetPack(pack);
-		ReadPackCell(pack);
-		WritePackCell(pack, seconds-1);
-		ResetPack(pack);
+		pack.Reset();
+		pack.ReadCell();
+		pack.WriteCell(seconds-1);
+		pack.Reset();
 
 		CreateTimer(1.0, Timer_Countdown, pack);
 	}
@@ -356,37 +404,37 @@ public Action:Timer_Countdown(Handle:timer, any:pack)
 	return Plugin_Stop;
 }
 
-stock bool:AddMenuItemEx(Handle:menu, style, String:info[], String:display[], any:...)
+stock bool AddMenuItemEx(Handle menu, int style, char[] info, char[] display, any ...)
 {
-	decl String:m_display[256];
+	char m_display[256];
 	VFormat(m_display, sizeof(m_display), display, 5);
 	return (AddMenuItem(menu, info, m_display, style)?true:false);
 }
 
-stock SetPanelTitleEx(Handle:menu, String:display[], any:...)
+stock void SetPanelTitleEx(Handle menu, char[] display, any ...)
 {
-	decl String:m_display[256];
+	char m_display[256];
 	VFormat(m_display, sizeof(m_display), display, 3);
 	SetPanelTitle(menu, m_display);
 }
 
-stock DrawPanelItemEx(Handle:menu, style, String:display[], any:...)
+stock int DrawPanelItemEx(Handle menu, int style, char[] display, any ...)
 {
-	decl String:m_display[256];
+	char m_display[256];
 	VFormat(m_display, sizeof(m_display), display, 4);
 	return DrawPanelItem(menu, m_display, style);
 }
 
-stock DrawPanelTextEx(Handle:menu, String:display[], any:...)
+stock int DrawPanelTextEx(Handle menu, char[] display, any ...)
 {
-	decl String:m_display[256];
+	char m_display[256];
 	VFormat(m_display, sizeof(m_display), display, 3);
 	return DrawPanelText(menu, m_display);
 }
 
-stock bool:InsertMenuItemEx(Handle:menu, position, style, String:info[], String:display[], any:...)
+stock bool InsertMenuItemEx(Handle menu, int position, int style, char[] info, char[] display, any ...)
 {
-	decl String:m_display[256];
+	char m_display[256];
 	VFormat(m_display, sizeof(m_display), display, 6);
 	if(GetMenuItemCount(menu)==position)
 		return (AddMenuItem(menu, info, m_display, style)?true:false);
@@ -394,36 +442,36 @@ stock bool:InsertMenuItemEx(Handle:menu, position, style, String:info[], String:
 		return (InsertMenuItem(menu, position, info, m_display, style)?true:false);
 }
 
-stock ClearTimer(&Handle:timer)
+stock void ClearTimer(Handle &timer)
 {
-	if(timer != INVALID_HANDLE)
+	if(timer != null)
 	{
 		KillTimer(timer);
-		timer = INVALID_HANDLE;
+		timer = null;
 	}
 }
 
-stock bool:ShouldHappen(chance)
+stock bool ShouldHappen(int chance)
 {
 	return (GetRandomInt(1, 100)<=chance?true:false);
 }
 
-stock Downloader_ParseMDL(const String:model[], String:internal[], maxlen1, String:files[][], maxsize, maxlen2)
+stock int Downloader_ParseMDL(const char[] model, char[] internal, int maxlen1, char[][] files, int maxsize, int maxlen2)
 {
 	if(!FileExists2(model))
 		return 0;
 
-	new m_iID;
-	new m_iVersion;
-	new m_iNum = 0;
-	new m_iDirNum = 0;
-	new m_iOffset = 0;
-	new m_iDirOffset = 0;
-	new m_iNameOffset = 0;
-	new m_iIdx = 0;
+	int m_iID;
+	int m_iVersion;
+	int m_iNum = 0;
+	int m_iDirNum = 0;
+	int m_iOffset = 0;
+	int m_iDirOffset = 0;
+	int m_iNameOffset = 0;
+	int m_iIdx = 0;
 
-	new Handle:m_hFile = OpenFile2(model, "rb");
-	if(m_hFile==INVALID_HANDLE)
+	Handle m_hFile = OpenFile2(model, "rb");
+	if(m_hFile==null)
 		return 0;
 
 	ReadFileCell(m_hFile, m_iID, 4);
@@ -437,7 +485,7 @@ stock Downloader_ParseMDL(const String:model[], String:internal[], maxlen1, Stri
 	ReadFileCell(m_hFile, m_iDirNum, 4);
 	ReadFileCell(m_hFile, m_iDirOffset, 4);
 
-	new String:m_szPath[PLATFORM_MAX_PATH];
+	char m_szPath[PLATFORM_MAX_PATH];
 	if(m_iDirNum!=0)
 	{
 		FileSeek(m_hFile, m_iDirOffset, SEEK_SET);
@@ -446,7 +494,7 @@ stock Downloader_ParseMDL(const String:model[], String:internal[], maxlen1, Stri
 		ReadFileString(m_hFile, m_szPath, sizeof(m_szPath));
 	}
 
-	new String:m_szMaterial[PLATFORM_MAX_PATH];
+	char m_szMaterial[PLATFORM_MAX_PATH];
 	for(m_iIdx=0;m_iIdx<m_iNum;++m_iIdx)
 	{
 		FileSeek(m_hFile, m_iOffset+m_iIdx*64, SEEK_SET);
@@ -460,15 +508,15 @@ stock Downloader_ParseMDL(const String:model[], String:internal[], maxlen1, Stri
 	return m_iNum;
 }
 
-new String:g_szModelExts[][16] = {".phy", ".sw.vtx", ".dx80.vtx", ".dx90.vtx", ".vtx", ".xbox.vtx", ".vvd"};
-stock Downloader_GetModelFiles(const String:model[], const String:internal[], String:files[][], maxsize, maxlen)
+char g_szModelExts[][16] = {".phy", ".sw.vtx", ".dx80.vtx", ".dx90.vtx", ".vtx", ".xbox.vtx", ".vvd"};
+stock int Downloader_GetModelFiles(const char[] model, const char[] internal, char[][] files, int maxsize, int maxlen)
 {
-	decl String:m_szRawPath1[PLATFORM_MAX_PATH];
-	decl String:m_szRawPath2[PLATFORM_MAX_PATH];
+	char m_szRawPath1[PLATFORM_MAX_PATH];
+	char m_szRawPath2[PLATFORM_MAX_PATH];
 	strcopy(m_szRawPath1, sizeof(m_szRawPath1), model);
 	Format(m_szRawPath2, sizeof(m_szRawPath2), "models/%s", internal);
 
-	new m_iDot = FindCharInString(m_szRawPath1, '.', true);
+	int m_iDot = FindCharInString(m_szRawPath1, '.', true);
 	if(m_iDot == -1)
 		return 0;
 	m_szRawPath1[m_iDot] = 0;
@@ -478,8 +526,8 @@ stock Downloader_GetModelFiles(const String:model[], const String:internal[], St
 		return 0;
 	m_szRawPath2[m_iDot] = 0;
 
-	new m_iNum = 0;
-	for(new i=0;i<sizeof(g_szModelExts);++i)
+	int m_iNum = 0;
+	for(int i=0;i<sizeof(g_szModelExts);++i)
 	{
 		if(m_iNum == maxsize)
 			break;
@@ -496,26 +544,26 @@ stock Downloader_GetModelFiles(const String:model[], const String:internal[], St
 	return m_iNum;
 }
 
-new String:g_szMaterialKeys[][64] = {"$baseTexture", "$bumpmap", "$lightwarptexture"};
-stock Downloader_GetMaterialsFromVMT(const String:vmt[], String:materials[][], maxsize, maxlen)
+char g_szMaterialKeys[][64] = {"$baseTexture", "$bumpmap", "$lightwarptexture"};
+stock int Downloader_GetMaterialsFromVMT(const char[] vmt, char[][] materials, int maxsize, int maxlen)
 {
 	if(!FileExists2(vmt))
 		return 0;
 
-	decl String:m_szLine[512];
+	char m_szLine[512];
 
-	new Handle:m_hFile = OpenFile2(vmt, "r");
+	Handle m_hFile = OpenFile2(vmt, "r");
 	
-	new bool:m_bFound[sizeof(g_szMaterialKeys)];
-	decl m_iPos;
-	decl m_iLast;
-	new m_iNum = 0;
+	bool m_bFound[sizeof(g_szMaterialKeys)];
+	int m_iPos;
+	int m_iLast;
+	int m_iNum = 0;
 	while(ReadFileLine(m_hFile, m_szLine, sizeof(m_szLine))!=false)
 	{
 		if(m_iNum == sizeof(g_szMaterialKeys) || maxsize == m_iNum)
 			break;
 
-		for(new i=0;i<sizeof(g_szMaterialKeys);++i)
+		for(int i=0;i<sizeof(g_szMaterialKeys);++i)
 		{
 			if(m_bFound[i])
 				continue;
@@ -541,14 +589,14 @@ stock Downloader_GetMaterialsFromVMT(const String:vmt[], String:materials[][], m
 	return m_iNum;
 }
 
-new Handle:g_hCachedFiles = INVALID_HANDLE;
-new Handle:g_hCachedNums = INVALID_HANDLE;
-stock Downloader_AddFileToDownloadsTable(const String:filename[])
+Handle g_hCachedFiles = null;
+Handle g_hCachedNums = null;
+stock int Downloader_AddFileToDownloadsTable(const char[] filename)
 {
 	if(!FileExists2(filename))
 		return 0;
 
-	if(g_hCachedNums == INVALID_HANDLE)
+	if(g_hCachedNums == null)
 	{
 		g_hCachedNums = CreateTrie();
 		g_hCachedFiles = CreateArray(PLATFORM_MAX_PATH);
@@ -556,12 +604,12 @@ stock Downloader_AddFileToDownloadsTable(const String:filename[])
 
 	AddFileToDownloadsTable(filename);
 
-	decl m_iValue;
+	int m_iValue;
 	if(GetTrieValue(g_hCachedNums, filename, m_iValue))
 	{
-		new m_iStart = FindStringInArray(g_hCachedFiles, filename)+1;
-		decl String:m_szFile[PLATFORM_MAX_PATH];
-		for(new i=m_iStart-m_iValue-1;i<m_iStart-1;++i)
+		int m_iStart = FindStringInArray(g_hCachedFiles, filename)+1;
+		char m_szFile[PLATFORM_MAX_PATH];
+		for(int i=m_iStart-m_iValue-1;i<m_iStart-1;++i)
 		{
 			if(i<0)
 				break;
@@ -571,36 +619,36 @@ stock Downloader_AddFileToDownloadsTable(const String:filename[])
 		return true;
 	}
 
-	decl String:m_szExt[16];
-	new m_iDot = FindCharInString(filename, '.', true);
+	char m_szExt[16];
+	int m_iDot = FindCharInString(filename, '.', true);
 	if(m_iDot == -1)
 		return true;
 
-	new m_iNumFiles = 0;
+	int m_iNumFiles = 0;
 
 	strcopy(m_szExt, sizeof(m_szExt), filename[m_iDot]);
-	decl String:m_szMaterials[32][PLATFORM_MAX_PATH];
-	decl m_iNum;
+	char m_szMaterials[32][PLATFORM_MAX_PATH];
+	int m_iNum;
 	if(strcmp(m_szExt, ".mdl") == 0)
 	{
-		decl String:m_szFiles[sizeof(g_szModelExts)][PLATFORM_MAX_PATH];
-		new String:m_szInternal[64];
+		char m_szFiles[sizeof(g_szModelExts)][PLATFORM_MAX_PATH];
+		char m_szInternal[64];
 
 		m_iNum = Downloader_ParseMDL(filename, m_szInternal, sizeof(m_szInternal), m_szMaterials, sizeof(m_szMaterials), sizeof(m_szMaterials[]));
-		for(new i=0;i<m_iNum;++i)
+		for(int i=0;i<m_iNum;++i)
 		{
 			if(FileExists2(m_szMaterials[i]))
 				m_iNumFiles += Downloader_AddFileToDownloadsTable(m_szMaterials[i])+1;
 		}
 
 		m_iNum = Downloader_GetModelFiles(filename, m_szInternal, m_szFiles, sizeof(m_szFiles), sizeof(m_szFiles[]));
-		for(new i=0;i<m_iNum;++i)
+		for(int i=0;i<m_iNum;++i)
 			m_iNumFiles += Downloader_AddFileToDownloadsTable(m_szFiles[i])+1;
 	} else if(strcmp(m_szExt, ".vmt") == 0)
 	{
 		m_iNum = Downloader_GetMaterialsFromVMT(filename, m_szMaterials, sizeof(m_szMaterials), sizeof(m_szMaterials[]));
-		decl String:m_szMaterial[PLATFORM_MAX_PATH];
-		for(new i=0;i<m_iNum;++i)
+		char m_szMaterial[PLATFORM_MAX_PATH];
+		for(int i=0;i<m_iNum;++i)
 		{
 			Format(m_szMaterial, sizeof(m_szMaterial), "materials\\%s.vtf", m_szMaterials[i]);
 			if(FileExists2(m_szMaterial))
@@ -614,19 +662,19 @@ stock Downloader_AddFileToDownloadsTable(const String:filename[])
 	return m_iNumFiles;
 }
 
-new Handle:g_hCustomFiles = INVALID_HANDLE;
+Handle g_hCustomFiles = null;
 
-public CacheCustomDirectory()
+stock void CacheCustomDirectory()
 {
 	g_hCustomFiles = CreateTrie();
 
-	new Handle:m_hDir = OpenDirectory("custom");
-	if(m_hDir == INVALID_HANDLE)
+	Handle m_hDir = OpenDirectory("custom");
+	if(m_hDir == null)
 		return;
 
-	new String:m_szDirectory[PLATFORM_MAX_PATH] = "custom/";
-	decl FileType:m_eType;
-	new m_unLen = strlen(m_szDirectory);
+	char m_szDirectory[PLATFORM_MAX_PATH] = "custom/";
+	FileType m_eType;
+	int m_unLen = strlen(m_szDirectory);
 
 	while(ReadDirEntry(m_hDir, m_szDirectory[m_unLen], sizeof(m_szDirectory)-m_unLen, m_eType))
 	{
@@ -641,14 +689,14 @@ public CacheCustomDirectory()
 	CloseHandle(m_hDir);
 }
 
-public CacheDirectory(const String:directory[])
+stock void CacheDirectory(const char[] directory)
 {
-	new Handle:m_hDir = OpenDirectory(directory);
-	decl String:m_szPath[PLATFORM_MAX_PATH];
-	decl FileType:m_eType;
+	Handle m_hDir = OpenDirectory(directory);
+	char m_szPath[PLATFORM_MAX_PATH];
+	FileType m_eType;
 	Format(m_szPath, sizeof(m_szPath), "%s/", directory);
-	new m_unLen = strlen(m_szPath);
-	new m_unOffset = FindCharInString(m_szPath, '/')+1;
+	int m_unLen = strlen(m_szPath);
+	int m_unOffset = FindCharInString(m_szPath, '/')+1;
 	m_unOffset += FindCharInString(m_szPath[m_unOffset], '/')+1;
 
 	while(ReadDirEntry(m_hDir, m_szPath[m_unLen], sizeof(m_szPath)-m_unLen, m_eType))
@@ -666,12 +714,12 @@ public CacheDirectory(const String:directory[])
 	CloseHandle(m_hDir);
 }
 
-stock Handle:OpenFile2(const String:file[], const String:mode[])
+stock Handle OpenFile2(const char[] file, const char[] mode)
 {
-	if(g_hCustomFiles == INVALID_HANDLE)
+	if(g_hCustomFiles == null)
 		CacheCustomDirectory();
 
-	decl String:m_szPath[PLATFORM_MAX_PATH];
+	char m_szPath[PLATFORM_MAX_PATH];
 	if(!GetTrieString(g_hCustomFiles, file, m_szPath, sizeof(m_szPath)))
 	{
 		strcopy(m_szPath, sizeof(m_szPath), file);
@@ -680,25 +728,25 @@ stock Handle:OpenFile2(const String:file[], const String:mode[])
 	return OpenFile(m_szPath, mode);
 }
 
-stock bool:FileExists2(const String:file[])
+stock bool FileExists2(const char[] file)
 {
-	if(g_hCustomFiles == INVALID_HANDLE)
+	if(g_hCustomFiles == null)
 		CacheCustomDirectory();
 
-	decl String:m_szPath[PLATFORM_MAX_PATH];
+	char m_szPath[PLATFORM_MAX_PATH];
 	if(!GetTrieString(g_hCustomFiles, file, m_szPath, sizeof(m_szPath)))
 		return FileExists(file);
 
 	return FileExists(m_szPath);
 }
 
-stock bool:IsPluginLoaded(String:name[])
+stock bool IsPluginLoaded(char[] name)
 {
-	new String:m_szName[PLATFORM_MAX_PATH];
-	new Handle:pluginIterator = GetPluginIterator();
+	char m_szName[PLATFORM_MAX_PATH];
+	Handle pluginIterator = GetPluginIterator();
 	while (MorePlugins(pluginIterator))
 	{
-		new Handle:currentPlugin = ReadPlugin(pluginIterator);
+		Handle currentPlugin = ReadPlugin(pluginIterator);
 		GetPluginFilename(currentPlugin, m_szName, sizeof(m_szName));
 		m_szName[strlen(m_szName)-4]=0;
 		if(strcmp(name, m_szName)==0)
@@ -707,7 +755,7 @@ stock bool:IsPluginLoaded(String:name[])
 	return false;
 }
 
-stock PrecacheModel2(const String:model[], bool:preload=false)
+stock int PrecacheModel2(const char[] model, bool preload=false)
 {
 	static m_unModelPrecache = INVALID_STRING_TABLE;
 	//static m_unDynamicModel = INVALID_STRING_TABLE;
@@ -735,17 +783,17 @@ stock PrecacheModel2(const String:model[], bool:preload=false)
 	}
 	else if(m_unDynamicModel != -2)
 	{
-		new idx = PrecacheDynamicModel(model);
+		int idx = PrecacheDynamicModel(model);
 		return idx;
 	}
 
 	return 0;*/
 }
 
-stock StringTableContains(const table, const String:model[])
+stock int StringTableContains(int table, const char[] model)
 {
-	new String:str[PLATFORM_MAX_PATH];
-	for(new i=0;i<GetStringTableNumStrings(table);++i)
+	char str[PLATFORM_MAX_PATH];
+	for(int i=0;i<GetStringTableNumStrings(table);++i)
 	{
 		ReadStringTable(table, i, STRING(str));
 		if(strcmp(str, model)==0)
@@ -754,15 +802,15 @@ stock StringTableContains(const table, const String:model[])
 	return 0;
 }
 
-stock GetLegacyAuthString(client, String:out[], maxlen, bool:validate=true)
+stock bool GetLegacyAuthString(int client, char[] out, int maxlen, bool validate=true)
 {
-	new String:m_szSteamID[32];
-	new bool:success = GetClientAuthId(client, AuthId_Steam2, m_szSteamID, sizeof(m_szSteamID), validate);
+	char m_szSteamID[32];
+	bool success = GetClientAuthId(client, AuthId_Steam2, m_szSteamID, sizeof(m_szSteamID), validate);
 
 	if(m_szSteamID[0]=='[')
 	{
-		new m_unAccountID = StringToInt(m_szSteamID[5]);
-		new m_unMod = m_unAccountID % 2;
+		int m_unAccountID = StringToInt(m_szSteamID[5]);
+		int m_unMod = m_unAccountID % 2;
 		Format(out, maxlen, "STEAM_0:%d:%d", m_unMod, (m_unAccountID-m_unMod)/2);
 	}
 	else
@@ -773,15 +821,15 @@ stock GetLegacyAuthString(client, String:out[], maxlen, bool:validate=true)
 	return success;
 }
 
-stock GetFriendID(client, bool:validate=true)
+stock int GetFriendID(int client, bool validate=true)
 {
-	new String:auth[32];
+	char auth[32];
 	GetLegacyAuthString(client, auth, sizeof(auth), validate);
 
 	return ToAccountID(auth);
 }
 
-stock ToAccountID(String:auth[])
+stock int ToAccountID(char[] auth)
 {
 	if(strlen(auth)<11)
 		return 0;

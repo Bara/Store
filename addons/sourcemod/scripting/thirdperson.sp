@@ -1,4 +1,5 @@
 #pragma semicolon 1
+#pragma newdecls required
 
 #define PLUGIN_NAME "Thirdperson | Mirrow Mode"
 #define PLUGIN_AUTHOR "Zephyrus"
@@ -9,7 +10,6 @@
 #include <sourcemod>
 #include <sdktools>
 #include <zephstocks>
-#pragma newdecls required
 
 bool g_bThirdperson[MAXPLAYERS+1] = {false,...};
 bool mirror[MAXPLAYERS+1] = {false,...};

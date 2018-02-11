@@ -417,9 +417,9 @@ public AdminMenu_ResetDb(Handle:topmenu, TopMenuAction:action, TopMenuObject:obj
 
 public FakeMenuHandler_ResetDatabase(Handle:menu, MenuAction:action, client, param2)
 {
-	SQL_TVoid(g_hDatabase, "DROP TABLE store_players");
-	SQL_TVoid(g_hDatabase, "DROP TABLE store_items");
-	SQL_TVoid(g_hDatabase, "DROP TABLE store_equipment");
+	SQL_TVoid(view_as<Database>(g_hDatabase), "DROP TABLE store_players");
+	SQL_TVoid(view_as<Database>(g_hDatabase), "DROP TABLE store_items");
+	SQL_TVoid(view_as<Database>(g_hDatabase), "DROP TABLE store_equipment");
 	ServerCommand("_restart");
 }
 
@@ -1255,10 +1255,10 @@ public Action:Command_GiveCredits(client, params)
 			else
 			{
 				Format(m_szQuery, sizeof(m_szQuery), "INSERT OR IGNORE INTO store_players (authid) VALUES (\"%s\")", m_szTmp[8]);
-				SQL_TVoid(g_hDatabase, m_szQuery);
+				SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 				Format(m_szQuery, sizeof(m_szQuery), "UPDATE store_players SET credits=credits+%d WHERE authid=\"%s\"", m_iCredits, m_szTmp[8]);
 			}
-			SQL_TVoid(g_hDatabase, m_szQuery);
+			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 			CPrintToChatAll("%t", "Credits Given", m_szTmp[8], m_iCredits);
 			m_iReceiver = -1;
 		}
@@ -2132,7 +2132,7 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 		if(m_szDriver[0] == 'm')
 		{
 			g_bMySQL = true;
-			SQL_TVoid(g_hDatabase, "CREATE TABLE IF NOT EXISTS `store_players` (\
+			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_players` (\
 										  `id` int(11) NOT NULL AUTO_INCREMENT,\
 										  `authid` varchar(32) NOT NULL,\
 										  `name` varchar(64) NOT NULL,\
@@ -2143,7 +2143,7 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  UNIQUE KEY `id` (`id`),\
 										  UNIQUE KEY `authid` (`authid`)\
 										)");
-			SQL_TVoid(g_hDatabase, "CREATE TABLE IF NOT EXISTS `store_items` (\
+			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_items` (\
 										  `id` int(11) NOT NULL AUTO_INCREMENT,\
 										  `player_id` int(11) NOT NULL,\
 										  `type` varchar(16) NOT NULL,\
@@ -2152,13 +2152,13 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  `date_of_expiration` int(11) NOT NULL,\
 										  PRIMARY KEY (`id`)\
 										)");
-			SQL_TVoid(g_hDatabase, "CREATE TABLE IF NOT EXISTS `store_equipment` (\
+			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_equipment` (\
 										  `player_id` int(11) NOT NULL,\
 										  `type` varchar(16) NOT NULL,\
 										  `unique_id` varchar(256) NOT NULL,\
 										  `slot` int(11) NOT NULL\
 										)");
-			SQL_TVoid(g_hDatabase, "CREATE TABLE IF NOT EXISTS `store_logs` (\
+			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_logs` (\
 										  `id` int(11) NOT NULL AUTO_INCREMENT,\
 										  `player_id` int(11) NOT NULL,\
 										  `credits` int(11) NOT NULL,\
@@ -2180,11 +2180,11 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  `supported_game` varchar(64) NOT NULL,\
 										  PRIMARY KEY (`id`)\
 										)", g_eCvars[g_cvarItemsTable][sCache]);
-			SQL_TVoid(g_hDatabase, m_szQuery);
+			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 		}
 		else
 		{
-			SQL_TVoid(g_hDatabase, "CREATE TABLE IF NOT EXISTS `store_players` (\
+			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_players` (\
 										  `id` INTEGER PRIMARY KEY AUTOINCREMENT,\
 										  `authid` varchar(32) NOT NULL,\
 										  `name` varchar(64) NOT NULL,\
@@ -2192,7 +2192,7 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  `date_of_join` int(11) NOT NULL,\
 										  `date_of_last_join` int(11) NOT NULL\
 										)");
-			SQL_TVoid(g_hDatabase, "CREATE TABLE IF NOT EXISTS `store_items` (\
+			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_items` (\
 										  `id` INTEGER PRIMARY KEY AUTOINCREMENT,\
 										  `player_id` int(11) NOT NULL,\
 										  `type` varchar(16) NOT NULL,\
@@ -2200,7 +2200,7 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 										  `date_of_purchase` int(11) NOT NULL,\
 										  `date_of_expiration` int(11) NOT NULL\
 										)");
-			SQL_TVoid(g_hDatabase, "CREATE TABLE IF NOT EXISTS `store_equipment` (\
+			SQL_TVoid(view_as<Database>(g_hDatabase), "CREATE TABLE IF NOT EXISTS `store_equipment` (\
 										  `player_id` int(11) NOT NULL,\
 										  `type` varchar(16) NOT NULL,\
 										  `unique_id` varchar(256) NOT NULL,\
@@ -2217,7 +2217,7 @@ public SQLCallback_Connect(Handle:owner, Handle:hndl, const String:error[], any:
 		// Do some housekeeping
 		decl String:m_szQuery[256];
 		Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE `date_of_expiration` <> 0 AND `date_of_expiration` < %d", GetTime());
-		SQL_TVoid(g_hDatabase, m_szQuery);
+		SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 	}
 }
 
@@ -2487,11 +2487,11 @@ public SQLCallback_ResetPlayer(Handle:owner, Handle:hndl, const String:error[], 
 
 			decl String:m_szQuery[512];
 			Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_players WHERE id=%d", id);
-			SQL_TVoid(g_hDatabase, m_szQuery);
+			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 			Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE player_id=%d", id);
-			SQL_TVoid(g_hDatabase, m_szQuery);
+			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 			Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_equipment WHERE player_id=%d", id);
-			SQL_TVoid(g_hDatabase, m_szQuery);
+			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 
 			CPrintToChatAll("%t", "Player Resetted", m_szAuthId);
 
@@ -2551,7 +2551,7 @@ public Store_SaveClientInventory(client)
 		{
 			g_eClientItems[client][i][bSynced] = true;
 			Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_items (`player_id`, `type`, `unique_id`, `date_of_purchase`, `date_of_expiration`, `price_of_purchase`) VALUES(%d, \"%s\", \"%s\", %d, %d, %d)", g_eClients[client][iId], m_szType, m_szUniqueId, g_eClientItems[client][i][iDateOfPurchase], g_eClientItems[client][i][iDateOfExpiration], g_eClientItems[client][i][iPriceOfPurchase]);
-			SQL_TVoid(g_hDatabase, m_szQuery);
+			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 		} else if(g_eClientItems[client][i][bSynced] && g_eClientItems[client][i][bDeleted])
 		{
 			// Might have been synced already but ID wasn't acquired
@@ -2559,7 +2559,7 @@ public Store_SaveClientInventory(client)
 				Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE `player_id`=%d AND `type`=\"%s\" AND `unique_id`=\"%s\"", g_eClients[client][iId], m_szType, m_szUniqueId);
 			else
 				Format(m_szQuery, sizeof(m_szQuery), "DELETE FROM store_items WHERE `id`=%d", g_eClientItems[client][i][iId]);
-			SQL_TVoid(g_hDatabase, m_szQuery);
+			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 		}
 	}
 }
@@ -2584,7 +2584,7 @@ public Store_SaveClientEquipment(client)
 			else
 				Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_equipment (`player_id`, `type`, `unique_id`, `slot`) VALUES(%d, \"%s\", \"%s\", %d)", g_eClients[client][iId], g_eTypeHandlers[i][szType], g_eItems[g_eClients[client][aEquipment][m_iId]][szUniqueId], a);
 
-			SQL_TVoid(g_hDatabase, m_szQuery);
+			SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 			g_eClients[client][aEquipmentSynced][m_iId] = g_eClients[client][aEquipment][m_iId];
 		}
 	}
@@ -2609,7 +2609,7 @@ public Store_SaveClientData(client)
 
 	g_eClients[client][iOriginalCredits] = g_eClients[client][iCredits];
 
-	SQL_TVoid(g_hDatabase, m_szQuery);
+	SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 }
 
 public Store_DisconnectClient(client)
@@ -3064,7 +3064,7 @@ Store_LogMessage(client, credits, const String:message[], ...)
 	{
 		decl String:m_szQuery[256];
 		Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_logs (player_id, credits, reason, date) VALUES(%d, %d, \"%s\", %d)", g_eClients[client][iId], credits, m_szReason, GetTime());
-		SQL_TVoid(g_hDatabase, m_szQuery);
+		SQL_TVoid(view_as<Database>(g_hDatabase), m_szQuery);
 	}
 }
 
