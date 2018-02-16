@@ -2116,7 +2116,7 @@ public Action:Timer_DatabaseTimeout(Handle:timer, any:userid)
 
 public SQLCallback_Connect(Database db, const char[] error, any data)
 {
-	if (db != null)
+	if (db == null)
 	{
 		SetFailState("Failed to connect to SQL database. Error: %s", error);
 	}
@@ -2125,12 +2125,13 @@ public SQLCallback_Connect(Database db, const char[] error, any data)
 		// If it's already connected we are good to go
 		if(g_dDatabase != null)
 			return;
-			
+		
 		g_dDatabase = db;
+			
 		char m_szDriver[2];
 		DBDriver iDriver = g_dDatabase.Driver;
 		iDriver.GetIdentifier(m_szDriver, sizeof(m_szDriver));
-		if(m_szDriver[0] == 'm')
+		if (StrEqual(m_szDriver, "mysql", false))
 		{
 			g_bMySQL = true;
 			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_players` (\

@@ -8,7 +8,7 @@ new g_iMessageColors = 0;
 
 public CPSupport_OnPluginStart()
 {	
-	if(FindPluginByFile("chat-processor.smx")==INVALID_HANDLE)
+	if(FindPluginByFile("chat-processor.smx") == INVALID_HANDLE)
 	{
 		LogError("Chat-Processor isn't installed or failed to load. Chat-Processor support will be disabled. (https://forums.alliedmods.net/showthread.php?t=286913)");
 		return;
