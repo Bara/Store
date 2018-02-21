@@ -133,8 +133,8 @@
 	"Chat Gift Item Received"
 	{
 		"#format" "{1:s},{2:s},{3:t}"
-		"en" {lightgreen}{1}{default} has sent you a {lightgreen}{2} {3}{default} as a gift."
-		"hu" {lightgreen}{1}{default} a következőt küldte neked: {lightgreen}{2} {3}{default}."
+		"en" "{lightgreen}{1}{default} has sent you a {lightgreen}{2} {3}{default} as a gift."
+		"hu" "{lightgreen}{1}{default} a következőt küldte neked: {lightgreen}{2} {3}{default}."
 	}
 	
 	"Credit Gift Disabled"
@@ -171,14 +171,14 @@
 	{
 		"#format" "{1:d},{2:s}"
 		"en" "You have sent {lightgreen}{1}{default} credits to {lightgreen}{2}{default}.
-		"hu" {lightgreen}{1}{default} kreditet küldtél neki: {lightgreen}{2}{default}."
+		"hu" "{lightgreen}{1}{default} kreditet küldtél neki: {lightgreen}{2}{default}."
 	}
 	
 	"Credit Gift Received"
 	{
 		"#format" "{1:d},{2:s}"
-		"en" {lightgreen}{2}{default} has sent you {lightgreen}{1}{default} credits."
-		"hu" {lightgreen}{2}{default} {lightgreen}{1}{default} kreditet küldött neked."
+		"en" "{lightgreen}{2}{default} has sent you {lightgreen}{1}{default} credits."
+		"hu" "{lightgreen}{2}{default} {lightgreen}{1}{default} kreditet küldött neked."
 	}
 	
 	"Package Sell"
@@ -308,22 +308,22 @@
 	"Player Credits"
 	{
 		"#format" "{1:s},{2:d}"
-		"en" {lightgreen}{1}{default} has {lightgreen}{2}{default} credits."
-		"hu" {lightgreen}{1}{default} {lightgreen}{2}{default} kredittel rendelkezik."
+		"en" "{lightgreen}{1}{default} has {lightgreen}{2}{default} credits."
+		"hu" "{lightgreen}{1}{default} {lightgreen}{2}{default} kredittel rendelkezik."
 	}
 
 	"Credits Earned For Killing"
 	{
 		"#format" "{1:d},{2:s}"
 		"en" "You earned {lightgreen}{1}{default} credits for killing {lightgreen}{2}{default}."
-		"hu" {lightgreen}{2}{default} megölésével {lightgreen}{1}{default} kreditet szereztél."
+		"hu" "{lightgreen}{2}{default} megölésével {lightgreen}{1}{default} kreditet szereztél."
 	}
 
 	"Credits Earned For Playing"
 	{
 		"#format" "{1:d}"
 		"en" "You earned {lightgreen}{1}{default} credits for playing on the server."
-		"hu" {lightgreen}{1}{default} kreditet szereztél az itt töltött időért.
+		"hu" "{lightgreen}{1}{default} kreditet szereztél az itt töltött időért.
 	}
 
 	"Drop Gift"
@@ -343,14 +343,14 @@
 	{
 		"#format" "{1:d}"
 		"en" "You picked up {lightgreen}{1} credits{default}."
-		"hu" {lightgreen}{1} kreditet{default} vettél fel."
+		"hu" "{lightgreen}{1} kreditet{default} vettél fel."
 	}
 
 	"Credit Gift Dropped"
 	{
 		"#format" "{1:d}"
 		"en" "You dropped {lightgreen}{1} credits{default} as a gift."
-		"hu" {lightgreen}{1} kreditet{default} ajándékoztál el."
+		"hu" "{lightgreen}{1} kreditet{default} ajándékoztál el."
 	}
 
 	"Must be Alive"
