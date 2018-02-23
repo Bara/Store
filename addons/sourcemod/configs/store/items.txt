@@ -3566,6 +3566,7 @@
 				"color" "{gray}"
 				"price" "60"
 				"type" "namecolor"
+				"games" "tf,cstrike"
 			}
 
 			"Green"
@@ -3582,6 +3583,13 @@
 				"type" "namecolor"
 				"games" "tf,cstrike"
 			}
+
+			"Grey"
+			{
+				"color" "{grey}"
+				"price" "60"
+				"type" "namecolor"
+				
 
 			"Haunted"
 			{
@@ -4701,6 +4709,7 @@
 				"color" "{gray}"
 				"price" "120"
 				"type" "msgcolor"
+				"games" "tf,cstrike"
 			}
 
 			"Green"
@@ -4716,6 +4725,13 @@
 				"price" "120"
 				"type" "msgcolor"
 				"games" "tf,cstrike"
+			}
+
+			"Grey"
+			{
+				"color" "{grey}"
+				"price" "120"
+				"type" "msgcolor"
 			}
 
 			"Haunted"
