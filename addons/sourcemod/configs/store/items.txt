@@ -4273,6 +4273,15 @@
 				"color" "{white}"
 				"price" "60"
 				"type" "namecolor"
+				"games" "tf,cstrike"
+			}
+
+			"White"
+			{
+				"color" "{default}"
+				"price" "60"
+				"type" "namecolor"
+				"games" "csgo"
 			}
 
 			"Yellow"
@@ -5416,7 +5425,17 @@
 				"color" "{white}"
 				"price" "120"
 				"type" "msgcolor"
+				"games" "tf,cstrike"
 			}
+
+			"White"
+			{
+				"color" "{default}"
+				"price" "120"
+				"type" "msgcolor"
+				"games" "csgo"
+			}
+			
 
 			"Yellow"
 			{
