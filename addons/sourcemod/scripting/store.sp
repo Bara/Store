@@ -2378,24 +2378,6 @@ public SQLCallback_LoadClientInventory_Equipment(Database db, DBResultSet result
 	}
 }
 
-public SQLCallback_RefreshCredits(Database db, DBResultSet results, const char[] error, any userid)
-{
-	if (db != null)
-		LogError("Error happened. Error: %s", error);
-	else
-	{
-		new client = GetClientOfUserId(userid);
-		if(!client)
-			return;
-			
-		if(results.FetchRow())
-		{
-			g_eClients[client][iCredits] = results.FetchInt(3);
-			g_eClients[client][iOriginalCredits] = results.FetchInt(3);
-		}
-	}
-}
-
 public SQLCallback_InsertClient(Database db, DBResultSet results, const char[] error, any userid)
 {
 	if (db != null)
