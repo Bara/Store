@@ -2233,14 +2233,17 @@ public SQLCallback_Connect(Database db, const char[] error, any data)
 
 public SQLCallback_LoadClientInventory_Credits(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if (db != null)
+	if (db == null)
+	{
 		LogError("Error happened. Error: %s", error);
+	}
 	else
 	{
 		new client = GetClientOfUserId(userid);
+
 		if(!client)
 			return;
-		
+
 		char m_szQuery[256];
 		char m_szSteamID[32];
 		new m_iTime = GetTime();
@@ -2250,7 +2253,6 @@ public SQLCallback_LoadClientInventory_Credits(Database db, DBResultSet results,
 		strcopy(g_eClients[client][szAuthId], 32, m_szSteamID[8]);
 		GetClientName(client, g_eClients[client][szName], 64);
 		SQL_EscapeString(g_dDatabase, g_eClients[client][szName], g_eClients[client][szNameEscaped], 128);
-		
 		if(results.FetchRow())
 		{
 			g_eClients[client][iId] = results.FetchInt(0);
@@ -2270,6 +2272,7 @@ public SQLCallback_LoadClientInventory_Credits(Database db, DBResultSet results,
 		{
 			Format(m_szQuery, sizeof(m_szQuery), "INSERT INTO store_players (`authid`, `name`, `credits`, `date_of_join`, `date_of_last_join`) VALUES(\"%s\", '%s', %d, %d, %d)",
 						g_eClients[client][szAuthId], g_eClients[client][szNameEscaped], g_eCvars[g_cvarStartCredits][aCache], m_iTime, m_iTime);
+
 			g_dDatabase.Query(SQLCallback_InsertClient, m_szQuery, userid);
 			g_eClients[client][iCredits] = g_eCvars[g_cvarStartCredits][aCache];
 			g_eClients[client][iOriginalCredits] = g_eCvars[g_cvarStartCredits][aCache];
@@ -2281,14 +2284,13 @@ public SQLCallback_LoadClientInventory_Credits(Database db, DBResultSet results,
 			if(g_eCvars[g_cvarStartCredits][aCache] > 0)
 				Store_LogMessage(client, g_eCvars[g_cvarStartCredits][aCache], "Start credits");
 		}
-		
 		g_eClients[client][hCreditTimer] = Store_CreditTimer(client);
 	}
 }
 
 public SQLCallback_LoadClientInventory_Items(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if (db != null)
+	if (db == null)
 		LogError("Error happened. Error: %s", error);
 	else
 	{	
@@ -2342,7 +2344,7 @@ public SQLCallback_LoadClientInventory_Items(Database db, DBResultSet results, c
 
 public SQLCallback_LoadClientInventory_Equipment(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if (db != null)
+	if (db == null)
 		LogError("Error happened. Error: %s", error);
 	else
 	{
@@ -2373,7 +2375,7 @@ public SQLCallback_LoadClientInventory_Equipment(Database db, DBResultSet result
 
 public SQLCallback_InsertClient(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if (db != null)
+	if (db == null)
 		LogError("Error happened. Error: %s", error);
 	else
 	{
@@ -2387,7 +2389,7 @@ public SQLCallback_InsertClient(Database db, DBResultSet results, const char[] e
 
 public SQLCallback_ReloadConfig(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if (db != null)
+	if (db == null)
 	{
 		SetFailState("Error happened reading the config table. The plugin cannot continue.", error);
 	}
@@ -2464,7 +2466,7 @@ public SQLCallback_ReloadConfig(Database db, DBResultSet results, const char[] e
 
 public SQLCallback_ResetPlayer(Database db, DBResultSet results, const char[] error, any userid)
 {
-	if (db != null)
+	if (db == null)
 		LogError("Error happened. Error: %s", error);
 	else
 	{
@@ -2513,7 +2515,7 @@ public Store_LoadClientInventory(client)
 	if(m_szAuthId[0] == 0)
 		return;
 
-	Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_players WHERE `authid`=\"%s\"", m_szAuthId[8]);
+	Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_players WHERE `authid`=\"%s\";", m_szAuthId[8]);
 
 	g_dDatabase.Query(SQLCallback_LoadClientInventory_Credits, m_szQuery, g_eClients[client][iUserId]);
 }
@@ -2594,10 +2596,7 @@ public Store_SaveClientData(client)
 		return;
 	
 	char m_szQuery[256];
-	if(g_bMySQL)
-		Format(m_szQuery, sizeof(m_szQuery), "UPDATE store_players SET `credits`=GREATEST(`credits`+%d,0), `date_of_last_join`=%d, `name`='%s' WHERE `id`=%d", g_eClients[client][iCredits]-g_eClients[client][iOriginalCredits], g_eClients[client][iDateOfLastJoin], g_eClients[client][szNameEscaped], g_eClients[client][iId]);
-	else
-		Format(m_szQuery, sizeof(m_szQuery), "UPDATE store_players SET `credits`=MAX(`credits`+%d,0), `date_of_last_join`=%d, `name`='%s' WHERE `id`=%d", g_eClients[client][iCredits]-g_eClients[client][iOriginalCredits], g_eClients[client][iDateOfLastJoin], g_eClients[client][szNameEscaped], g_eClients[client][iId]);
+	Format(m_szQuery, sizeof(m_szQuery), "UPDATE store_players SET `credits`=`credits`+%d, `date_of_last_join`=%d, `name`='%s' WHERE `id`=%d", g_eClients[client][iCredits]-g_eClients[client][iOriginalCredits], g_eClients[client][iDateOfLastJoin], g_eClients[client][szNameEscaped], g_eClients[client][iId]);
 
 	g_eClients[client][iOriginalCredits] = g_eClients[client][iCredits];
 
