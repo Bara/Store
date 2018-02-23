@@ -3221,6 +3221,13 @@
 				"type" "namecolor"
 				"games" "tf,cstrike"
 			}
+			"Blue-Grey"
+			{
+				"color" "{bluegrey}"
+				"price" "60"
+				"type" "namecolor"
+				"games" "csgo"
+			}
 			"Blue Violet"
 			{
 				"color" "{blueviolet}"
@@ -3311,7 +3318,7 @@
 				"color" "{darkblue}"
 				"price" "60"
 				"type" "namecolor"
-				"games" "tf,cstrike"
+				"games" "tf,cstrike,csgo"
 			}
 
 			"Dark Cyan"
@@ -3589,7 +3596,15 @@
 				"color" "{grey}"
 				"price" "60"
 				"type" "namecolor"
-				
+			}
+			
+			"Grey2"
+			{
+				"color" "{grey2}"
+				"price" "60"
+				"type" "namecolor"
+				"games" "csgo"
+			}
 
 			"Haunted"
 			{
@@ -3684,7 +3699,6 @@
 				"color" "{lightblue}"
 				"price" "60"
 				"type" "namecolor"
-				"games" "tf,cstrike"
 			}
 
 			"Light Coral"
@@ -3717,6 +3731,14 @@
 				"price" "60"
 				"type" "namecolor"
 			}
+			
+			"Light Red2"
+			{
+				"color" "{lightred2}"
+				"price" "60"
+				"type" "namecolor"
+				"games" "csgo"
+			}
 
 			"Light Gray"
 			{
@@ -3731,7 +3753,7 @@
 				"color" "{lightgreen}"
 				"price" "60"
 				"type" "namecolor"
-				"games" "tf,cstrike"
+				"games" "tf,cstrike,csgo"
 			}
 
 			"Light Pink"
@@ -3977,7 +3999,6 @@
 				"color" "{orange}"
 				"price" "60"
 				"type" "namecolor"
-				"games" "tf,cstrike"
 			}
 
 			"Orange Red"
@@ -3993,7 +4014,6 @@
 				"color" "{orchid}"
 				"price" "60"
 				"type" "namecolor"
-				"games" "tf,cstrike"
 			}
 
 			"Pale Golden Rod"
@@ -4081,7 +4101,6 @@
 				"color" "{purple}"
 				"price" "60"
 				"type" "namecolor"
-				"games" "tf,cstrike"
 			}
 
 			"Red"
@@ -4289,7 +4308,6 @@
 				"color" "{yellow}"
 				"price" "60"
 				"type" "namecolor"
-				"games" "tf,cstrike"
 			}
 
 			"Yellow Green"
@@ -4372,6 +4390,13 @@
 				"price" "120"
 				"type" "msgcolor"
 				"games" "tf,cstrike"
+			}
+			"Blue-Grey"
+			{
+				"color" "{bluegrey}"
+				"price" "60"
+				"type" "msgcolor"
+				"games" "csgo"
 			}
 			"Blue Violet"
 			{
@@ -4463,7 +4488,7 @@
 				"color" "{darkblue}"
 				"price" "120"
 				"type" "msgcolor"
-				"games" "tf,cstrike"
+				"games" "tf,cstrike,csgo"
 			}
 
 			"Dark Cyan"
@@ -4742,6 +4767,14 @@
 				"price" "120"
 				"type" "msgcolor"
 			}
+			
+			"Grey2"
+			{
+				"color" "{grey2}"
+				"price" "120"
+				"type" "msgcolor"
+				"games" "csgo"
+			}
 
 			"Haunted"
 			{
@@ -4836,7 +4869,6 @@
 				"color" "{lightblue}"
 				"price" "120"
 				"type" "msgcolor"
-				"games" "tf,cstrike"
 			}
 
 			"Light Coral"
@@ -4877,13 +4909,21 @@
 				"price" "120"
 				"type" "msgcolor"
 			}
+			
+			"Light Red 2"
+			{
+				"color" "{lightred2}"
+				"price" "120"
+				"type" "msgcolor"
+				"games" "csgo"
+			}
 
 			"Light Green"
 			{
 				"color" "{lightgreen}"
 				"price" "120"
 				"type" "msgcolor"
-				"games" "tf,cstrike"
+				"games" "tf,cstrike,csgo"
 			}
 
 			"Light Pink"
@@ -5129,7 +5169,6 @@
 				"color" "{orange}"
 				"price" "120"
 				"type" "msgcolor"
-				"games" "tf,cstrike"
 			}
 
 			"Orange Red"
@@ -5145,7 +5184,6 @@
 				"color" "{orchid}"
 				"price" "120"
 				"type" "msgcolor"
-				"games" "tf,cstrike"
 			}
 
 			"Pale Golden Rod"
@@ -5233,7 +5271,6 @@
 				"color" "{purple}"
 				"price" "120"
 				"type" "msgcolor"
-				"games" "tf,cstrike"
 			}
 
 			"Red"
@@ -5442,7 +5479,6 @@
 				"color" "{yellow}"
 				"price" "120"
 				"type" "msgcolor"
-				"games" "tf,cstrike"
 			}
 
 			"Yellow Green"
