@@ -1,14 +1,20 @@
+/*
+
+	Support SQLite UTF8MB4 as charset like mysql?
+
+*/
+
 #pragma semicolon 1
 
 //////////////////////////////
 //		DEFINITIONS			//
 //////////////////////////////
 
-#define PLUGIN_NAME "Store - The Resurrection"
+#define PLUGIN_NAME "Store"
 #define PLUGIN_AUTHOR "Zephyrus"
-#define PLUGIN_DESCRIPTION "A completely new Store system."
-#define PLUGIN_VERSION "1.1"
-#define PLUGIN_URL ""
+#define PLUGIN_DESCRIPTION "Updated zeph. store with new syntax and supported includes (chat-processor, multicolors, ...)"
+#define PLUGIN_VERSION "1.2-dev"
+#define PLUGIN_URL "github.com/Bara/Store"
 
 //////////////////////////////
 //			INCLUDES		//
@@ -224,7 +230,7 @@ public OnPluginStart()
 	g_cvarLogging = RegisterConVar("sm_store_logging", "0", "Set this to 1 for file logging and 2 to SQL logging (only MySQL). Leaving on 0 means disabled.", TYPE_INT);
 	g_cvarSilent = RegisterConVar("sm_store_silent_givecredits", "0", "Controls the give credits message visibility. 0 = public 1 = private 2 = no message", TYPE_INT);
 
-	// Register Commands
+	// Register Console Commands
 	RegConsoleCmd("sm_store", Command_Store);
 	RegConsoleCmd("sm_shop", Command_Store);
 	RegConsoleCmd("sm_inv", Command_Inventory);
@@ -233,6 +239,8 @@ public OnPluginStart()
 	RegConsoleCmd("sm_givecredits", Command_GiveCredits);
 	RegConsoleCmd("sm_resetplayer", Command_ResetPlayer);
 	RegConsoleCmd("sm_credits", Command_Credits);
+
+	// Register Server Commands
 	RegServerCmd("sm_store_custom_credits", Command_CustomCredits);
 	
 	// Hook events
@@ -301,6 +309,7 @@ public OnPluginStart()
 	AddCommandListener(Command_Say, "say");
 	AddCommandListener(Command_Say, "say_team");
 
+	// Lateload player data
 	LoopIngamePlayers(client)
 	{
 		OnClientConnected(client);
@@ -1314,6 +1323,8 @@ public Action:Command_GiveCredits(client, params)
 		else if(g_eCvars[g_cvarSilent][aCache] == 0)
 			CPrintToChatAll("%t", "Credits Given", g_eClients[m_iReceiver][szName], m_iCredits);
 		Store_LogMessage(m_iReceiver, m_iCredits, "Given by Admin");
+
+		Store_SaveClientData(m_iReceiver);
 	}
 	
 	return Plugin_Handled;
@@ -1376,7 +1387,7 @@ public Action:Command_ResetPlayer(client, params)
 }
 
 public Action:Command_Credits(client, params)
-{	
+{
 	if(g_eClients[client][iCredits] == -1 && g_eClients[client][iItems] == -1)
 	{
 		CPrintToChat(client, "%t", "Inventory hasnt been fetched");
@@ -2066,12 +2077,12 @@ public GetMultipliedCredits(client, amount)
 public Action:Timer_CreditTimer(Handle:timer, any:userid)
 {
 	new client = GetClientOfUserId(userid);
-	if(!client || !IsClientInGame(client))
+	if(!client || !IsClientInGame(client) || IsFakeClient(client))
 		return Plugin_Continue;
 	
 	decl m_iCredits;
 	new team = GetClientTeam(client);
-	if(2<=team<=3)
+	if(team == 2 || team == 3)
 		m_iCredits = g_eCvars[g_cvarCreditAmountActive][aCache];
 	else
 		m_iCredits = g_eCvars[g_cvarCreditAmountInactive][aCache];
@@ -2082,8 +2093,12 @@ public Action:Timer_CreditTimer(Handle:timer, any:userid)
 	{
 		g_eClients[client][iCredits] += m_iCredits;
 		if(g_eCvars[g_cvarCreditMessages][aCache])
+		{
 			CPrintToChat(client, "%t", "Credits Earned For Playing", m_iCredits);
+		}
 		Store_LogMessage(client, m_iCredits, "Earned for playing");
+
+		Store_SaveClientData(client);
 	}
 
 	return Plugin_Continue;
@@ -2144,7 +2159,7 @@ public SQLCallback_Connect(Database db, const char[] error, any data)
 										  PRIMARY KEY (`id`),\
 										  UNIQUE KEY `id` (`id`),\
 										  UNIQUE KEY `authid` (`authid`)\
-										)");
+										) ENGINE=InnoDB CHARSET=utf8mb4;");
 			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_items` (\
 										  `id` int(11) NOT NULL AUTO_INCREMENT,\
 										  `player_id` int(11) NOT NULL,\
@@ -2153,13 +2168,13 @@ public SQLCallback_Connect(Database db, const char[] error, any data)
 										  `date_of_purchase` int(11) NOT NULL,\
 										  `date_of_expiration` int(11) NOT NULL,\
 										  PRIMARY KEY (`id`)\
-										)");
+										) ENGINE=InnoDB CHARSET=utf8mb4;");
 			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_equipment` (\
 										  `player_id` int(11) NOT NULL,\
 										  `type` varchar(16) NOT NULL,\
 										  `unique_id` varchar(256) NOT NULL,\
 										  `slot` int(11) NOT NULL\
-										)");
+										) ENGINE=InnoDB CHARSET=utf8mb4;");
 			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_logs` (\
 										  `id` int(11) NOT NULL AUTO_INCREMENT,\
 										  `player_id` int(11) NOT NULL,\
@@ -2167,7 +2182,7 @@ public SQLCallback_Connect(Database db, const char[] error, any data)
 										  `reason` varchar(256) NOT NULL,\
 										  `date` int(11) NOT NULL,\
 										  PRIMARY KEY (`id`)\
-										)");
+										) ENGINE=InnoDB CHARSET=utf8mb4;");
 			g_dDatabase.Query(SQLCallback_NoError, "ALTER TABLE store_items ADD COLUMN price_of_purchase int(11)");
 			char m_szQuery[512];
 			Format(m_szQuery, sizeof(m_szQuery), "CREATE TABLE IF NOT EXISTS `%s` (\
@@ -2181,10 +2196,10 @@ public SQLCallback_Connect(Database db, const char[] error, any data)
 										  `item_status` tinyint(1) NOT NULL,\
 										  `supported_game` varchar(64) NOT NULL,\
 										  PRIMARY KEY (`id`)\
-										)", g_eCvars[g_cvarItemsTable][sCache]);
+										) ENGINE=InnoDB CHARSET=utf8mb4;", g_eCvars[g_cvarItemsTable][sCache]);
 			SQL_TVoid(g_dDatabase, m_szQuery);
 		}
-		else
+		else // sqlite utf8
 		{
 			SQL_TVoid(g_dDatabase, "CREATE TABLE IF NOT EXISTS `store_players` (\
 										  `id` INTEGER PRIMARY KEY AUTOINCREMENT,\
