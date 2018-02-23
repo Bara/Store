@@ -27,7 +27,6 @@
 #undef REQUIRE_PLUGIN
 #include <store>
 #include <zephstocks>
-#include <donate>
 #include <adminmenu>
 #include <multicolors>
 #include <sdkhooks>
@@ -322,9 +321,6 @@ public OnPluginStart()
 public OnAllPluginsLoaded()
 {
 	CreateTimer(1.0, LoadConfig);
-
-	if(GetFeatureStatus(FeatureType_Native, "Donate_RegisterHandler")==FeatureStatus_Available)
-		Donate_RegisterHandler("Store", Store_OnPaymentReceived);
 }
 
 public Action:LoadConfig(Handle:timer, any:data)
@@ -338,9 +334,6 @@ public OnPluginEnd()
 	LoopIngamePlayers(i)
 		if(g_eClients[i][bLoaded])
 			OnClientDisconnect(i);
-
-	if(GetFeatureStatus(FeatureType_Native, "Donate_RemoveHandler")==FeatureStatus_Available)
-		Donate_RemoveHandler("Store");
 }
 
 public APLRes:AskPluginLoad2(Handle:myself, bool:late, String:error[], err_max)
@@ -3091,23 +3084,4 @@ Store_GetClientItemPrice(client, itemid)
 		return g_eItems[itemid][iPrice];
 
 	return g_eClientItems[client][uid][iPriceOfPurchase];
-}
-
-public Store_OnPaymentReceived(FriendID, quanity, Handle:data)
-{
-	LoopIngamePlayers(i)
-	{
-		if(GetFriendID(i)==FriendID)
-		{
-			Store_SaveClientData(i);
-
-			new m_unMod = FriendID % 2;
-			new m_unAccountID = (FriendID-m_unMod)/2;
-
-			char m_szQuery[256];
-			Format(m_szQuery, sizeof(m_szQuery), "SELECT * FROM store_players WHERE `authid`=\"%d:%d\"", m_unMod, m_unAccountID);
-			g_dDatabase.Query(SQLCallback_LoadClientInventory_Credits, m_szQuery, GetClientUserId(i));
-			break;
-		}
-	}
 }
